@@ -1,163 +1,12 @@
 // netlify/functions/cari-profesi.js
 
-const DAFTAR_PROFESI = `000. Tidak Bekerja
-001. Agen Tenaga Kerja
-002. Ahli Sejarah dan Cagar Budaya
-003. Akuntan
-004. Analis Keuangan
-005. Anggota DPD
-006. Anggota DPR RI/MPR RI
-007. Anggota DPRD Provinsi/Anggota DPRD Kabupaten/Kota
-008. Apoteker
-009. Arsiparis
-010. Arsitek
-011. Asisten Apoteker
-013. Atlet/Olahragawan
-014. Awak Kapal
-018. Bidan
-021. Buruh Angkut Barang
-022. Buruh Bangunan
-023. Buruh Industri
-024. Buruh Perikanan
-025. Buruh Pertambangan
-026. Buruh Pertanian/Kehutanan
-027. Buruh Peternakan
-028. Camat
-029. Chef
-030. Chief Executive Officer (CEO)
-031. Dokter Gigi
-032. Dokter Hewan
-033. Dokter Spesialis
-034. Dokter Umum
-035. Dosen
-038. Fotografer
-039. Gembala
-040. Gubernur
-041. Guru
-042. Hakim
-043. Hakim Agung
-044. Imam Masjid
-045. Jaksa
-048. Juru Gambar Teknik/Drafter
-049. Kameramen
-050. Kapten Kapal
-051. Kasir
-052. Kepala Desa
-053. Ketua Adat
-054. Ketua Organisasi
-055. Konsultan
-056. Kreator Konten
-058. Kurir
-060. Makelar
-061. Manajer
-063. Mekanik
-069. Operator Mesin
-072. Paraji
-073. Paranormal
-074. Pastor
-075. Pedagang
-076. Pedagang Asongan/Keliling Makanan
-077. Pedagang Asongan/Keliling Nonmakanan
-078. Pedagang Online
-079. Pegawai Pemerintah dengan Perjanjian Kerja (PPPK)
-080. Pekerja Garmen/Konveksi
-081. Pekerja Percetakan
-082. Pekerja Profesional Penjualan (Agen Asuransi, Sales Penjualan, dll)
-083. Pekerja Sosial
-084. Pelaku Ekosistem Musik
-086. Pelaku Ekosistem Seni Pertunjukan
-087. Pelaku Ekosistem Seni Rupa dan Kriya
-088. Pelatih/Instruktur Olahraga
-089. Pelayan Toko
-090. Pembantu/Asisten Rumah Tangga
-091. Pemberi Pinjaman
-092. Pembuat Makanan/Juru Masak
-093. Pembuat Minuman (Barista, Bartender, dll)
-094. Pembuat Rokok/Cerutu/Tembakau Gulung
-095. Pembuat Sepatu dan Tas
-096. Pembudi Daya Ikan dan Biota Air Lainnya
-097. Pemulung
-098. Penagih Hutang (Debt Collector)
-099. Penasihat Spiritual
-100. Penata Busana
-101. Penata Rambut
-102. Penata Rias
-107. Pengacara
-108. Pengasuh Anak (Baby Sitter)
-109. Pengelola Gedung/Properti
-110. Pengemudi Ojek Online
-111. Pengemudi Ojek Pangkalan
-112. Pengepul
-113. Penjaga Keamanan/Satpam
-114. Penjahit
-115. Penulis
-116. Penyelenggara Acara (Event Organizer/EO)
-119. Perajin Batu
-120. Perajin Kayu, Bambu, dan Anyaman
-121. Perajin Kulit dan Tekstil
-122. Perajin Logam
-123. Perajin Perhiasan
-124. Perajin Tembikar/Keramik
-127. Perangkat Desa
-128. Perawat
-129. Petani/Pekebun/Petani Hutan
-130. Peternak
-131. Petugas Pemadam Kebakaran
-132. Petugas Stasiun Pengisian Bahan Bakar
-133. Pilot
-135. PNS Fungsional Tertentu
-136. PNS Fungsional Umum
-137. PNS Struktural
-138. Polisi
-139. Pramugara/i
-140. Pramusaji
-142. Programer
-143. Psikiater
-144. Psikolog
-145. Pustakawan
-146. Resepsionis
-147. Sekretaris
-148. Seniman/Artis
-149. Sopir
-150. Supervisor/Mandor
-151. Tabib
-152. Teknisi
-153. Teller Bank
-154. Tenaga Cuci
-155. Tenaga Humas
-156. Tenaga Kebersihan
-157. Tenaga Tata Usaha
-158. Tentara Nasional Indonesia (TNI)
-159. Tukang Bangunan
-160. Tukang Cat
-161. Tukang Cukur
-162. Tukang Fotokopi
-163. Tukang Gigi
-164. Tukang Kaca
-165. Tukang Kayu
-166. Tukang Kunci
-167. Tukang Las/Pandai Besi
-168. Tukang Listrik
-169. Tukang Pijat
-170. Tukang Pipa
-171. Tukang Sablon
-172. Tukang Sol Sepatu
-173. Tukang Tambal Ban
-174. Tukang Tebang Kayu
-176. Ustaz/Mubalig
-182. Wartawan
-185. Lainnya (tuliskan: ....................................)
-999. Tidak Tahu`;
-
 exports.handler = async (event) => {
-    // CORS header
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Content-Type': 'application/json'
     };
 
-    // Handle preflight
     if (event.httpMethod === 'OPTIONS') {
         return { statusCode: 200, headers };
     }
@@ -183,10 +32,166 @@ exports.handler = async (event) => {
                 model: 'llama-3.3-70b-versatile',
                 messages: [{
                     role: 'user',
-                    content: `You are a job classification assistant. Here is the COMPLETE list of available job codes:\n${DAFTAR_PROFESI}\n\nUser typed: "${keyword}"\n\nIMPORTANT RULES:\n1. Choose ONE best match from the list above.\n2. DO NOT invent or make up any job that is NOT in the list.\n3. If no match, return exactly: "185 - Lainnya (tuliskan: ....................................)" followed by "(saran: your suggestion)".\n4. Reply ONLY with this format: "CODE - JOB NAME"\n5. No extra words, no explanation.`
+                    content: `You are a job classifier. Match the user's input to the closest job from this list (codes in Indonesian, with English translation in brackets):
+
+000. Tidak Bekerja (Unemployed)
+001. Agen Tenaga Kerja (Labor Agent)
+002. Ahli Sejarah dan Cagar Budaya (Historian/Heritage Expert)
+003. Akuntan (Accountant)
+004. Analis Keuangan (Financial Analyst)
+005. Anggota DPD (Senator/Regional Representative)
+006. Anggota DPR RI/MPR RI (Parliament Member)
+007. Anggota DPRD Provinsi/Kabupaten/Kota (Local Parliament Member)
+008. Apoteker (Pharmacist)
+009. Arsiparis (Archivist)
+010. Arsitek (Architect)
+011. Asisten Apoteker (Pharmacy Assistant)
+013. Atlet/Olahragawan (Athlete)
+014. Awak Kapal (Ship Crew)
+018. Bidan (Midwife)
+021. Buruh Angkut Barang (Porter/Transporter)
+022. Buruh Bangunan (Construction Worker)
+023. Buruh Industri (Factory Worker)
+024. Buruh Perikanan (Fishery Worker)
+025. Buruh Pertambangan (Mining Worker)
+026. Buruh Pertanian/Kehutanan (Farm/Forestry Worker)
+027. Buruh Peternakan (Livestock Worker)
+028. Camat (Subdistrict Head)
+029. Chef (Chef)
+030. Chief Executive Officer/CEO (CEO)
+031. Dokter Gigi (Dentist)
+032. Dokter Hewan (Veterinarian)
+033. Dokter Spesialis (Specialist Doctor)
+034. Dokter Umum (General Doctor)
+035. Dosen (Lecturer)
+038. Fotografer (Photographer)
+039. Gembala (Shepherd)
+040. Gubernur (Governor)
+041. Guru (Teacher)
+042. Hakim (Judge)
+043. Hakim Agung (Supreme Judge)
+044. Imam Masjid (Mosque Imam)
+045. Jaksa (Prosecutor)
+048. Juru Gambar Teknik/Drafter (Drafter)
+049. Kameramen (Cameraman)
+050. Kapten Kapal (Ship Captain)
+051. Kasir (Cashier)
+052. Kepala Desa (Village Head)
+053. Ketua Adat (Traditional Leader)
+054. Ketua Organisasi (Organization Leader)
+055. Konsultan (Consultant)
+056. Kreator Konten (Content Creator)
+058. Kurir (Courier)
+060. Makelar (Broker)
+061. Manajer (Manager)
+063. Mekanik (Mechanic)
+069. Operator Mesin (Machine Operator)
+072. Paraji (Traditional Birth Attendant)
+073. Paranormal (Psychic)
+074. Pastor (Pastor/Priest)
+075. Pedagang (Trader/Merchant)
+076. Pedagang Asongan/Keliling Makanan (Street Food Vendor)
+077. Pedagang Asongan/Keliling Nonmakanan (Street Non-food Vendor)
+078. Pedagang Online (Online Seller)
+079. PPPK (Government Contract Worker)
+080. Pekerja Garmen/Konveksi (Garment Worker)
+081. Pekerja Percetakan (Printing Worker)
+082. Pekerja Profesional Penjualan/Agent/Sales (Sales Agent)
+083. Pekerja Sosial (Social Worker)
+084. Pelaku Ekosistem Musik (Music Industry Worker)
+086. Pelaku Ekosistem Seni Pertunjukan (Performing Arts Worker)
+087. Pelaku Ekosistem Seni Rupa dan Kriya (Visual Arts/Craft Worker)
+088. Pelatih/Instruktur Olahraga (Sports Coach)
+089. Pelayan Toko (Shop Assistant)
+090. Pembantu/Asisten Rumah Tangga (Domestic Helper)
+091. Pemberi Pinjaman (Money Lender)
+092. Pembuat Makanan/Juru Masak (Cook/Food Maker)
+093. Pembuat Minuman/Barista/Bartender (Beverage Maker/Barista)
+094. Pembuat Rokok/Cerutu/Tembakau Gulung (Cigarette Maker)
+095. Pembuat Sepatu dan Tas (Shoes/Bags Maker)
+096. Pembudi Daya Ikan (Fish Farmer)
+097. Pemulung (Scavenger)
+098. Penagih Hutang/Debt Collector (Debt Collector)
+099. Penasihat Spiritual (Spiritual Advisor)
+100. Penata Busana (Fashion Stylist)
+101. Penata Rambut (Hairdresser)
+102. Penata Rias (Makeup Artist)
+107. Pengacara (Lawyer)
+108. Pengasuh Anak/Baby Sitter (Babysitter)
+109. Pengelola Gedung/Properti (Property Manager)
+110. Pengemudi Ojek Online (Online Motorcycle Taxi Driver)
+111. Pengemudi Ojek Pangkalan (Conventional Motorcycle Taxi Driver)
+112. Pengepul (Collector/Middleman)
+113. Penjaga Keamanan/Satpam (Security Guard)
+114. Penjahit (Tailor)
+115. Penulis (Writer)
+116. Penyelenggara Acara/EO (Event Organizer)
+119. Perajin Batu (Stone Craftsman)
+120. Perajin Kayu/Bambu/Anyaman (Wood/Bamboo Craftsman)
+121. Perajin Kulit dan Tekstil (Leather/Textile Craftsman)
+122. Perajin Logam (Metal Craftsman)
+123. Perajin Perhiasan (Jewelry Craftsman)
+124. Perajin Tembikar/Keramik (Pottery/Ceramic Craftsman)
+127. Perangkat Desa (Village Official)
+128. Perawat (Nurse)
+129. Petani/Pekebun/Petani Hutan (Farmer/Plantation/Forestry)
+130. Peternak (Livestock Farmer)
+131. Petugas Pemadam Kebakaran (Firefighter)
+132. Petugas SPBU (Gas Station Attendant)
+133. Pilot (Pilot)
+135. PNS Fungsional Tertentu (Specialized Civil Servant)
+136. PNS Fungsional Umum (General Civil Servant)
+137. PNS Struktural (Structural Civil Servant)
+138. Polisi (Police)
+139. Pramugara/i (Flight Attendant)
+140. Pramusaji (Waiter/Waitress)
+142. Programer (Programmer)
+143. Psikiater (Psychiatrist)
+144. Psikolog (Psychologist)
+145. Pustakawan (Librarian)
+146. Resepsionis (Receptionist)
+147. Sekretaris (Secretary)
+148. Seniman/Artis (Artist)
+149. Sopir (Driver)
+150. Supervisor/Mandor (Supervisor/Foreman)
+151. Tabib (Traditional Healer)
+152. Teknisi (Technician)
+153. Teller Bank (Bank Teller)
+154. Tenaga Cuci (Laundry Worker)
+155. Tenaga Humas (Public Relations)
+156. Tenaga Kebersihan (Cleaner)
+157. Tenaga Tata Usaha (Administrative Staff)
+158. TNI (Military)
+159. Tukang Bangunan (Builder)
+160. Tukang Cat (Painter)
+161. Tukang Cukur (Barber)
+162. Tukang Fotokopi (Photocopy Operator)
+163. Tukang Gigi (Dental Technician)
+164. Tukang Kaca (Glass Worker)
+165. Tukang Kayu (Carpenter)
+166. Tukang Kunci (Locksmith)
+167. Tukang Las/Pandai Besi (Welder/Blacksmith)
+168. Tukang Listrik (Electrician)
+169. Tukang Pijat (Masseur)
+170. Tukang Pipa (Plumber)
+171. Tukang Sablon (Screen Printer)
+172. Tukang Sol Sepatu (Shoe Repairer)
+173. Tukang Tambal Ban (Tire Repairer)
+174. Tukang Tebang Kayu (Lumberjack)
+176. Ustaz/Mubalig (Islamic Preacher)
+182. Wartawan (Journalist)
+185. Lainnya (tuliskan: ....................................) (Others - write in)
+999. Tidak Tahu (Don't Know)
+
+User input: "${keyword}"
+
+RULES:
+1. Match to ONE job from the list above.
+2. Return ONLY the Indonesian format: "CODE - NAMA PROFESI"
+3. If no good match: "185 - Lainnya (tuliskan: ....................................)" followed by "(saran: your suggestion in Indonesian)"
+4. No extra text, no explanation.`
                 }],
-                temperature: 0.3,
-                max_tokens: 60
+                temperature: 0
             })
         });
 
