@@ -1,7 +1,6 @@
-exports.handler = async (event) => {
-    const { keyword } = JSON.parse(event.body);
+// netlify/functions/cari-profesi.js
 
-    const DAFTAR_PROFESI = `000. Tidak Bekerja
+const DAFTAR_PROFESI = `000. Tidak Bekerja
 001. Agen Tenaga Kerja
 002. Ahli Sejarah dan Cagar Budaya
 003. Akuntan
@@ -150,27 +149,60 @@ exports.handler = async (event) => {
 185. Lainnya (tuliskan: ....................................)
 999. Tidak Tahu`;
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.PROFESI_GRK}`
-        },
-        body: JSON.stringify({
-            model: 'llama-3.3-70b-versatile',
-            messages: [{
-                role: 'user',
-                content: `You are a job classification assistant. Here is the COMPLETE list of available job codes:\n${DAFTAR_PROFESI}\n\nUser typed: "${keyword}"\n\nIMPORTANT RULES:\n1. Choose ONE best match from the list above.\n2. DO NOT invent or make up any job that is NOT in the list.\n3. If no match, return exactly: "185 - Lainnya (tuliskan: ....................................)" followed by "(saran: your suggestion)".\n4. Reply ONLY with this format: "CODE - JOB NAME"\n5. No extra words, no explanation.`
-            }],
-            temperature: 0.3,
-            max_tokens: 60
-        })
-    });
-
-    const data = await response.json();
-
-    return {
-        statusCode: 200,
-        body: JSON.stringify(data)
+exports.handler = async (event) => {
+    // CORS header
+    const headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Content-Type': 'application/json'
     };
+
+    // Handle preflight
+    if (event.httpMethod === 'OPTIONS') {
+        return { statusCode: 200, headers };
+    }
+
+    try {
+        const { keyword } = JSON.parse(event.body);
+
+        if (!keyword) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ error: 'Keyword diperlukan' })
+            };
+        }
+
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'llama-3.3-70b-versatile',
+                messages: [{
+                    role: 'user',
+                    content: `You are a job classification assistant. Here is the COMPLETE list of available job codes:\n${DAFTAR_PROFESI}\n\nUser typed: "${keyword}"\n\nIMPORTANT RULES:\n1. Choose ONE best match from the list above.\n2. DO NOT invent or make up any job that is NOT in the list.\n3. If no match, return exactly: "185 - Lainnya (tuliskan: ....................................)" followed by "(saran: your suggestion)".\n4. Reply ONLY with this format: "CODE - JOB NAME"\n5. No extra words, no explanation.`
+                }],
+                temperature: 0.3,
+                max_tokens: 60
+            })
+        });
+
+        const data = await response.json();
+
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify(data)
+        };
+
+    } catch (err) {
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({ error: 'Gagal menghubungi AI' })
+        };
+    }
 };
