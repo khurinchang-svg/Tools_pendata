@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Kalkulator Industri Makanan - Satu Siklus Produksi">
+    <title>Kalkulator Industri Makanan</title>
+    <link rel="stylesheet" href="../css/kalkulator.css">
+    <style>
+        /* =========================================
+           TAMBAHAN CSS KHUSUS INDUSTRI MAKANAN
+        ========================================= */
+        
+        .industri-container {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Tooltip */
+        .tooltip-wrapper {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 4px;
+            cursor: help;
+        }
+        .tooltip-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition);
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .tooltip-icon:hover {
+            background: var(--primary-hover);
+            transform: scale(1.05);
+        }
+        .tooltip-popover {
+            display: none;
+            position: absolute;
+            background: #fff;
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--text);
+            max-width: 320px;
+            min-width: 200px;
+            box-shadow: var(--shadow-hover);
+            z-index: 100;
+            top: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            line-height: 1.4;
+        }
+        .tooltip-popover::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid var(--primary);
+        }
+        .tooltip-popover.aktif {
+            display: block;
+        }
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Radio group */
+        .radio-group-horizontal {
+            display: flex;
+            gap: 20px;
+            padding-top: 6px;
+            flex-wrap: wrap;
+        }
+        .radio-group-horizontal label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .radio-group-horizontal input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        /* Toggle penyusutan */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 0;
+            flex-wrap: wrap;
+        }
+        .toggle-row label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .toggle-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .toggle-row .sub-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toggle-row .sub-input input {
+            width: 180px;
+        }
+        .toggle-row .sub-input.hidden {
+            display: none;
+        }
+
+        /* Warning box */
+        .warning-box {
+            display: none;
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-top: 12px;
+            color: #856404;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .warning-box.aktif {
+            display: block;
+        }
+        .warning-box .icon {
+            font-size: 18px;
+            margin-right: 8px;
+        }
+
+        /* List item with copy button inline */
+        .list-item-with-copy {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 4px;
+            border-bottom: 1px solid #f5f5f5;
+            font-size: 14px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .list-item-with-copy .label {
+            color: var(--text-light);
+            font-weight: 500;
+            flex: 1;
+            min-width: 140px;
+        }
+        .list-item-with-copy .value {
+            font-weight: 700;
+            text-align: right;
+            font-size: 15px;
+            min-width: 120px;
+        }
+        .list-item-with-copy .copy-btn {
+            background: #e8f5e9;
+            border: 2px solid #a5d6a7;
+            border-radius: var(--radius-sm);
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+        }
+        .list-item-with-copy .copy-btn:hover {
+            background: #c8e6c9;
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+        .list-item-with-copy .copy-btn:active {
+            transform: scale(0.96);
+        }
+
+        .highlight-total {
+            background: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            margin-top: 6px;
+        }
+        .highlight-total .value {
+            font-size: 18px;
+        }
+
+        .sub-item {
+            padding-left: 20px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .sub-item .label {
+            font-weight: 400;
+            color: var(--text-light);
+        }
+
+        /* Tombol reset */
+        .btn-reset {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-xl);
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-reset:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+        .btn-reset:active {
+            transform: scale(0.98);
+        }
+        .btn-reset-wrapper {
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .list-item-with-copy {
+                flex-wrap: wrap;
+            }
+            .list-item-with-copy .label {
+                min-width: 100px;
+                font-size: 13px;
+            }
+            .list-item-with-copy .value {
+                font-size: 14px;
+                min-width: 80px;
+            }
+            .list-item-with-copy .copy-btn {
+                font-size: 11px;
+                padding: 3px 10px;
+            }
+            .tooltip-popover {
+                max-width: 260px;
+                min-width: 160px;
+                font-size: 12px;
+                padding: 8px 12px;
+                left: 0;
+                transform: none;
+            }
+            .tooltip-popover::before {
+                left: 16px;
+                transform: none;
+            }
+            .radio-group-horizontal {
+                gap: 12px;
+            }
+            .radio-group-horizontal label {
+                font-size: 13px;
+            }
+            .toggle-row .sub-input input {
+                width: 140px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .list-item-with-copy {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            .list-item-with-copy .value {
+                text-align: left;
+                width: 100%;
+            }
+            .list-item-with-copy .copy-btn {
+                align-self: flex-start;
+            }
+            .tooltip-popover {
+                max-width: 200px;
+                min-width: 140px;
+                font-size: 11px;
+                padding: 6px 10px;
+            }
+            .toggle-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .toggle-row .sub-input input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="industri-container">
+
+        <header class="header">
+            <div class="logo" aria-hidden="true">🏭</div>
+            <div class="judul">
+                <h1>PERKIRAAN PERHITUNGAN</h1>
+                <h2>INDUSTRI MAKANAN</h2>
+                <h3>Satu Siklus Produksi</h3>
+            </div>
+        </header>
+
+        <!-- ==================== INPUT ==================== -->
+        <section class="input-box">
+            <div class="section-title">INPUT DATA</div>
+            <div class="grid">
+
+                <!-- ===== PENDAPATAN ===== -->
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label style="font-weight:700;font-size:15px;color:var(--primary);">📊 PENDAPATAN</label>
+                </div>
+
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label for="nilaiPenjualan">
+                        Nilai Penjualan Sekali Produksi (Rp)
+                        <span class="tooltip-container">
+                            <span class="tooltip-wrapper" onclick="toggleTooltip(event, 'tooltipPenjualan')">
+                                <span class="tooltip-icon">ℹ️</span>
+                            </span>
+                            <span class="tooltip-popover" id="tooltipPenjualan">
+                                Kalau hasil sekali produksi habis terjual, kira-kira uang yang diterima berapa?
+                            </span>
+                        </span>
+                    </label>
+                    <input type="text" id="nilaiPenjualan" value="1.500.000" autocomplete="off">
+                </div>
+
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label for="pendapatanLain">
+                        Pendapatan Lainnya (Rp)
+                        <span class="tooltip-container">
+                            <span class="tooltip-wrapper" onclick="toggleTooltip(event, 'tooltipPendapatanLain')">
+                                <span class="tooltip-icon">ℹ️</span>
+                            </span>
+                            <span class="tooltip-popover" id="tooltipPendapatanLain">
+                                Pendapatan di luar penjualan utama (opsional)
+                            </span>
+                        </span>
+                    </label>
+                    <input type="text" id="pendapatanLain" value="0" autocomplete="off">
+                </div>
+
+                <!-- ===== PENGELUARAN ===== -->
+                <div class="form-group" style="grid-column:1/-1;margin-top:8px;">
+                    <label style="font-weight:700;font-size:15px;color:var(--primary);">💰 PENGELUARAN</label>
+                </div>
+
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label for="upahTenaga">
+                        a. Upah Tenaga Kerja (Rp)
+                        <span class="tooltip-container">
+                            <span class="tooltip-wrapper" onclick="toggleTooltip(event, 'tooltipUpah')">
+                                <span class="tooltip-icon">ℹ️</span>
+                            </span>
+                            <span class="tooltip-popover" id="tooltipUpah">
+                                Sekali produksi, upah yang dibayar berapa?
+                            </span>
+                        </span>
+                    </label>
+                    <input type="text" id="upahTenaga" value="200.000" autocomplete="off">
+                </div>
+
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label for="biayaBahan">
+                        b. Biaya Bahan Baku (Rp)
+                        <span class="tooltip-container">
+                            <span class="tooltip-wrapper" onclick="toggleTooltip(event, 'tooltipBahan')">
+                                <span class="tooltip-icon">ℹ️</span>
+                            </span>
+                            <span class="tooltip-popover" id="tooltipBahan">
+                                Bahan yang dipakai untuk sekali produksi nilainya sekitar berapa?
+                            </span>
+                        </span>
+                    </label>
+                    <input type="text" id="biayaBahan" value="1.000.000" autocomplete="off">
+                </div>
+
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label for="biayaKemasan">
+                        c. Biaya Kemasan (Rp)
+                        <span class="tooltip-container">
+                            <span class="tooltip-wrapper" onclick="toggleTooltip(event, 'tooltipKemasan')">
+                                <span class="tooltip-icon">ℹ️</span>
+                            </span>
+                            <span class="tooltip-popover" id="tooltipKemasan">
+                                Plastik, kardus, stiker, cup, sendok, dll.
+                            </span>
+                        </span>
+                    </label>
+                    <input type="text" id="biayaKemasan" value="100.000" autocomplete="off">
+                </div>
+
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label for="biayaOperasional">
+                        d. Biaya Operasional (Rp)
+                        <span class="tooltip-container">
+                            <span class="tooltip-wrapper" onclick="toggleTooltip(event, 'tooltipOperasional')">
+                                <span class="tooltip-icon">ℹ️</span>
+                            </span>
+                            <span class="tooltip-popover" id="tooltipOperasional">
+                                Gas, listrik, air, dll. sekali produksi habis berapa?
+                            </span>
+                        </span>
+                    </label>
+                    <input type="text" id="biayaOperasional" value="150.000" autocomplete="off">
+                </div>
+
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label for="biayaNonops">
+                        e. Biaya Nonoperasional (Rp)
+                        <span class="tooltip-container">
+                            <span class="tooltip-wrapper" onclick="toggleTooltip(event, 'tooltipNonops')">
+                                <span class="tooltip-icon">ℹ️</span>
+                            </span>
+                            <span class="tooltip-popover" id="tooltipNonops">
+                                Bunga pinjaman, denda, dll. (jika ada)
+                            </span>
+                        </span>
+                    </label>
+                    <input type="text" id="biayaNonops" value="0" autocomplete="off">
+                </div>
+
+                <!-- Penyusutan -->
+                <div class="form-group" style="grid-column:1/-1;">
+                    <div class="toggle-row">
+                        <label>
+                            <input type="checkbox" id="togglePenyusutan" onchange="togglePenyusutan()">
+                            ☐ Hitung Penyusutan
+                        </label>
+                        <div class="sub-input hidden" id="penyusutanWrapper">
+                            <label for="biayaPenyusutan" style="font-weight:400;font-size:13px;margin-bottom:0;">Nilai Penyusutan (Rp)</label>
+                            <input type="text" id="biayaPenyusutan" value="0" autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== KONVERSI BULANAN ===== -->
+                <div class="form-group" style="grid-column:1/-1;margin-top:8px;">
+                    <label style="font-weight:700;font-size:15px;color:var(--primary);">📈 KONVERSI BULANAN</label>
+                </div>
+
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label for="frekuensiProduksi">
+                        Frekuensi Produksi per Bulan (kali)
+                        <span class="tooltip-container">
+                            <span class="tooltip-wrapper" onclick="toggleTooltip(event, 'tooltipFrekuensi')">
+                                <span class="tooltip-icon">ℹ️</span>
+                            </span>
+                            <span class="tooltip-popover" id="tooltipFrekuensi">
+                                Dalam sebulan biasanya melakukan produksi seperti ini berapa kali?
+                            </span>
+                        </span>
+                    </label>
+                    <input type="number" id="frekuensiProduksi" value="20" min="0" step="1">
+                </div>
+
+                <!-- ===== ASET ===== -->
+                <div class="form-group" style="grid-column:1/-1;margin-top:8px;">
+                    <label style="font-weight:700;font-size:15px;color:var(--primary);">🏗️ ASET</label>
+                </div>
+
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label>Status Bangunan</label>
+                    <div class="radio-group-horizontal">
+                        <label>
+                            <input type="radio" name="statusBangunan" value="milik" checked onchange="toggleStatusBangunan()">
+                            Milik sendiri
+                        </label>
+                        <label>
+                            <input type="radio" name="statusBangunan" value="sewa" onchange="toggleStatusBangunan()">
+                            Sewa
+                        </label>
+                        <label>
+                            <input type="radio" name="statusBangunan" value="menumpang" onchange="toggleStatusBangunan()">
+                            Menumpang
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="panjangBangunan">Panjang Bangunan (m)</label>
+                    <input type="number" id="panjangBangunan" value="8" min="0" step="0.5">
+                </div>
+
+                <div class="form-group">
+                    <label for="lebarBangunan">Lebar Bangunan (m)</label>
+                    <input type="number" id="lebarBangunan" value="6" min="0" step="0.5">
+                </div>
+
+                <div class="form-group">
+                    <label for="biayaBangunan">
+                        Biaya Bangunan / m² (Rp)
+                        <span class="tooltip-container">
+                            <span class="tooltip-wrapper" onclick="toggleTooltip(event, 'tooltipBiayaBangunan')">
+                                <span class="tooltip-icon">ℹ️</span>
+                            </span>
+                            <span class="tooltip-popover" id="tooltipBiayaBangunan">
+                                Estimasi biaya pembangunan per meter persegi
+                            </span>
+                        </span>
+                    </label>
+                    <input type="text" id="biayaBangunan" value="1.500.000" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label for="nilaiPeralatan">
+                        Nilai Peralatan (Rp)
+                        <span class="tooltip-container">
+                            <span class="tooltip-wrapper" onclick="toggleTooltip(event, 'tooltipPeralatan')">
+                                <span class="tooltip-icon">ℹ️</span>
+                            </span>
+                            <span class="tooltip-popover" id="tooltipPeralatan">
+                                Mesin, kompor, panci, dll.
+                            </span>
+                        </span>
+                    </label>
+                    <input type="text" id="nilaiPeralatan" value="0" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label for="nilaiKendaraan">
+                        Nilai Kendaraan (Rp)
+                        <span class="tooltip-container">
+                            <span class="tooltip-wrapper" onclick="toggleTooltip(event, 'tooltipKendaraan')">
+                                <span class="tooltip-icon">ℹ️</span>
+                            </span>
+                            <span class="tooltip-popover" id="tooltipKendaraan">
+                                Kendaraan yang digunakan untuk usaha
+                            </span>
+                        </span>
+                    </label>
+                    <input type="text" id="nilaiKendaraan" value="0" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label for="nilaiInventaris">
+                        Nilai Inventaris (Rp)
+                        <span class="tooltip-container">
+                            <span class="tooltip-wrapper" onclick="toggleTooltip(event, 'tooltipInventaris')">
+                                <span class="tooltip-icon">ℹ️</span>
+                            </span>
+                            <span class="tooltip-popover" id="tooltipInventaris">
+                                Meja, kursi, rak, dll.
+                            </span>
+                        </span>
+                    </label>
+                    <input type="text" id="nilaiInventaris" value="0" autocomplete="off">
+                </div>
+
+                <!-- Tombol Reset -->
+                <div class="form-group" style="grid-column:1/-1;">
+                    <div class="btn-reset-wrapper">
+                        <button class="btn-reset" onclick="resetForm()">🗑 Reset Form</button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ==================== TAB MENU ==================== -->
+        <nav class="tab-menu" role="tablist">
+            <button class="tab active" data-tab="pendapatan" onclick="bukaTab('pendapatan')">Pendapatan</button>
+            <button class="tab" data-tab="pengeluaran" onclick="bukaTab('pengeluaran')">Pengeluaran</button>
+            <button class="tab" data-tab="konversi" onclick="bukaTab('konversi')">Konversi Bulanan</button>
+            <button class="tab" data-tab="aset" onclick="bukaTab('aset')">Aset</button>
+        </nav>
+
+        <!-- ==================== TAB PENDAPATAN ==================== -->
+        <section id="pendapatan" class="tab-content aktif" role="tabpanel">
+            <div class="card">
+                <h3 class="card-title">A. Pendapatan</h3>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">Rincian Pendapatan (Sekali Produksi)</h4>
+
+                    <div class="list-item">
+                        <span class="label">Nilai Penjualan Sekali Produksi</span>
+                        <span class="value" id="tNilaiPenjualan">Rp 0</span>
+                    </div>
+                    <div class="list-item">
+                        <span class="label">Pendapatan Lainnya</span>
+                        <span class="value" id="tPendapatanLain">Rp 0</span>
+                    </div>
+
+                    <div style="border-top:2px solid var(--border);margin:8px 0;"></div>
+
+                    <div class="list-item highlight-static">
+                        <span class="label" style="font-weight:800;">Total Pendapatan</span>
+                        <span class="value" id="tTotalPendapatan" style="font-size:18px;">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="btn-copy-row" onclick="copyValue('tTotalPendapatan')">
+                    <span class="btn-label">📋 Copy Total Pendapatan</span>
+                    <span class="btn-value" id="tTotalPendapatanCopy">Rp 0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB PENGELUARAN ==================== -->
+        <section id="pengeluaran" class="tab-content" role="tabpanel">
+            <div class="card">
+                <h3 class="card-title">B. Pengeluaran</h3>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">Rincian Pengeluaran (Sekali Produksi)</h4>
+
+                    <div class="list-item-with-copy">
+                        <span class="label">a. Upah Tenaga Kerja</span>
+                        <span class="value" id="tUpahTenaga">Rp 0</span>
+                        <button class="copy-btn" onclick="copyValue('tUpahTenaga')">📋 Copy</button>
+                    </div>
+
+                    <div class="list-item-with-copy">
+                        <span class="label">b. Biaya Bahan Baku</span>
+                        <span class="value" id="tBiayaBahan">Rp 0</span>
+                        <button class="copy-btn" onclick="copyValue('tBiayaBahan')">📋 Copy</button>
+                    </div>
+
+                    <div class="list-item-with-copy">
+                        <span class="label">c. Biaya Kemasan</span>
+                        <span class="value" id="tBiayaKemasan">Rp 0</span>
+                        <button class="copy-btn" onclick="copyValue('tBiayaKemasan')">📋 Copy</button>
+                    </div>
+
+                    <div class="list-item-with-copy">
+                        <span class="label">d. Biaya Operasional</span>
+                        <span class="value" id="tBiayaOperasional">Rp 0</span>
+                        <button class="copy-btn" onclick="copyValue('tBiayaOperasional')">📋 Copy</button>
+                    </div>
+
+                    <div class="list-item-with-copy">
+                        <span class="label">e. Biaya Nonoperasional</span>
+                        <span class="value" id="tBiayaNonops">Rp 0</span>
+                        <button class="copy-btn" onclick="copyValue('tBiayaNonops')">📋 Copy</button>
+                    </div>
+
+                    <div class="list-item-with-copy" style="border-bottom: 1px solid var(--border);">
+                        <span class="label">Penyusutan</span>
+                        <span class="value" id="tPenyusutan">Rp 0</span>
+                        <button class="copy-btn" onclick="copyValue('tPenyusutan')">📋 Copy</button>
+                    </div>
+
+                    <div style="border-top:2px solid var(--border);margin:8px 0;"></div>
+
+                    <div class="list-item highlight-static">
+                        <span class="label" style="font-weight:800;">Total Pengeluaran</span>
+                        <span class="value" id="tTotalPengeluaran" style="font-size:18px;">Rp 0</span>
+                    </div>
+
+                    <!-- Warning box -->
+                    <div class="warning-box" id="warningPengeluaran">
+                        <span class="icon">🟡</span>
+                        Pengeluaran lebih besar dari penjualan. Pastikan data sudah benar.
+                    </div>
+                </div>
+
+                <div class="btn-copy-row" onclick="copyValue('tTotalPengeluaran')">
+                    <span class="btn-label">📋 Copy Total Pengeluaran</span>
+                    <span class="btn-value" id="tTotalPengeluaranCopy">Rp 0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB KONVERSI BULANAN ==================== -->
+        <section id="konversi" class="tab-content" role="tabpanel">
+            <div class="card">
+                <h3 class="card-title">C. Konversi Bulanan</h3>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">Hasil Konversi per Bulan</h4>
+
+                    <div class="list-item">
+                        <span class="label">Frekuensi Produksi per Bulan</span>
+                        <span class="value" id="tFrekuensi">0 kali</span>
+                    </div>
+
+                    <div style="border-top:2px solid var(--border);margin:8px 0;"></div>
+
+                    <div class="list-item-with-copy">
+                        <span class="label">Pendapatan Bulanan</span>
+                        <span class="value" id="tPendapatanBulanan">Rp 0</span>
+                        <button class="copy-btn" onclick="copyValue('tPendapatanBulanan')">📋 Copy</button>
+                    </div>
+
+                    <div class="list-item-with-copy">
+                        <span class="label">Pengeluaran Bulanan</span>
+                        <span class="value" id="tPengeluaranBulanan">Rp 0</span>
+                        <button class="copy-btn" onclick="copyValue('tPengeluaranBulanan')">📋 Copy</button>
+                    </div>
+
+                    <div style="border-top:2px solid var(--border);margin:8px 0;"></div>
+
+                    <div class="list-item highlight-static">
+                        <span class="label" style="font-weight:800;">Keuntungan Bulanan</span>
+                        <span class="value" id="tKeuntunganBulanan" style="font-size:18px;">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="btn-copy-row" onclick="copyValue('tKeuntunganBulanan')">
+                    <span class="btn-label">📋 Copy Keuntungan Bulanan</span>
+                    <span class="btn-value" id="tKeuntunganBulananCopy">Rp 0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB ASET ==================== -->
+        <section id="aset" class="tab-content" role="tabpanel">
+            <div class="card">
+                <h3 class="card-title">D. Aset</h3>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">Nilai Aset</h4>
+
+                    <div class="list-item">
+                        <span class="label">Status Bangunan</span>
+                        <span class="value" id="tStatusBangunan">Milik sendiri</span>
+                    </div>
+
+                    <div class="list-item-with-copy">
+                        <span class="label">a. Nilai Aset Tanah &amp; Bangunan</span>
+                        <span class="value" id="tAsetTanahBangunan">Rp 0</span>
+                        <button class="copy-btn" onclick="copyValue('tAsetTanahBangunan')">📋 Copy</button>
+                    </div>
+
+                    <div class="list-item-with-copy">
+                        <span class="label">b. Nilai Aset Selain Tanah &amp; Bangunan</span>
+                        <span class="value" id="tAsetLainnya">Rp 0</span>
+                        <button class="copy-btn" onclick="copyValue('tAsetLainnya')">📋 Copy</button>
+                    </div>
+
+                    <div class="sub-item">
+                        <span class="label">└ Peralatan</span>
+                        <span class="value" id="tPeralatan">Rp 0</span>
+                    </div>
+                    <div class="sub-item">
+                        <span class="label">└ Kendaraan</span>
+                        <span class="value" id="tKendaraan">Rp 0</span>
+                    </div>
+                    <div class="sub-item" style="border-bottom: none;">
+                        <span class="label">└ Inventaris</span>
+                        <span class="value" id="tInventaris">Rp 0</span>
+                    </div>
+
+                    <div style="border-top:2px solid var(--border);margin:8px 0;"></div>
+
+                    <div class="list-item highlight-static">
+                        <span class="label" style="font-weight:800;">Total Aset</span>
+                        <span class="value" id="tTotalAset" style="font-size:18px;">Rp 0</span>
+                    </div>
+
+                    <div style="border-top:2px solid var(--border);margin:12px 0;"></div>
+
+                    <div class="list-item-with-copy">
+                        <span class="label">c. Luas Tanah untuk Usaha</span>
+                        <span class="value" id="tLuasTanah">0 m²</span>
+                        <button class="copy-btn" onclick="copyValue('tLuasTanah')">📋 Copy</button>
+                    </div>
+                </div>
+
+                <div class="btn-copy-row" onclick="copyValue('tTotalAset')">
+                    <span class="btn-label">📋 Copy Total Aset</span>
+                    <span class="btn-value" id="tTotalAsetCopy">Rp 0</span>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

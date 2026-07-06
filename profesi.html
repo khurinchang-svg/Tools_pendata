@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencarian Kode Profesi</title>
+    <style>
+        :root {
+            --primary: #006e16;
+            --primary-hover: #00881c;
+            --primary-alpha: rgba(0, 110, 22, 0.12);
+            --bg: #f5f7f6;
+            --card: #ffffff;
+            --text: #222;
+            --text-light: #666;
+            --border: #e2e8e4;
+            --radius: 18px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: 0.25s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            align-self: flex-start;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 28px 24px;
+            box-shadow: var(--shadow);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--text);
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 13px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-alpha);
+        }
+
+        .btn-cari {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-cari:hover { background: var(--primary-hover); }
+        .btn-cari:active { transform: scale(0.98); }
+        .btn-cari:disabled { background: #aaa; cursor: not-allowed; }
+
+        .hasil-box {
+            margin-top: 20px;
+            background: #e8f5e9;
+            border: 2px solid #a5d6a7;
+            border-radius: 14px;
+            padding: 16px;
+            display: none;
+        }
+
+        .hasil-box.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hasil-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .hasil-profesi {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .hasil-kode {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        .error-box {
+            background: #fff5f5;
+            border-color: #fcc;
+        }
+
+        .error-box .hasil-profesi {
+            color: #c62828;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 24px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .back-link:hover { color: var(--primary); }
+
+        .petunjuk {
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #e65100;
+            display: none;
+        }
+
+        .petunjuk.show { display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            <h1>Pencarian Kode Profesi</h1>
+            <p class="subtitle">Ketik nama pekerjaan untuk mendapatkan kode profesi yang sesuai</p>
+
+            <div class="form-group">
+                <label for="inputProfesi">Nama Pekerjaan</label>
+                <input type="text" id="inputProfesi" placeholder="Contoh: tukang somay, guru ngaji, jualan pulsa..." autocomplete="off">
+            </div>
+
+            <button class="btn-cari" id="btnCari" onclick="cariProfesi()">Cari Profesi</button>
+
+            <div class="hasil-box" id="hasilBox">
+                <div class="hasil-label" id="hasilLabel">Hasil Pencarian</div>
+                <div class="hasil-profesi" id="hasilProfesi"></div>
+                <div class="hasil-kode" id="hasilKode"></div>
+            </div>
+
+            <div class="petunjuk" id="petunjukSaran"></div>
+        </div>
+
+        <a href="index.html" class="back-link">← Kembali ke Halaman Utama</a>
+    </div>
+
+    <script>
+        const API_KEY = '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';
+
+        const DAFTAR_PROFESI = `000. Tidak Bekerja
+001. Agen Tenaga Kerja
+002. Ahli Sejarah dan Cagar Budaya
+003. Akuntan
+004. Analis Keuangan
+005. Anggota DPD
+006. Anggota DPR RI/MPR RI
+007. Anggota DPRD Provinsi/Anggota DPRD Kabupaten/Kota
+008. Apoteker
+009. Arsiparis
+010. Arsitek
+011. Asisten Apoteker
+013. Atlet/Olahragawan
+014. Awak Kapal
+018. Bidan
+021. Buruh Angkut Barang
+022. Buruh Bangunan
+023. Buruh Industri
+024. Buruh Perikanan
+025. Buruh Pertambangan
+026. Buruh Pertanian/Kehutanan
+027. Buruh Peternakan
+028. Camat
+029. Chef
+030. Chief Executive Officer (CEO)
+031. Dokter Gigi
+032. Dokter Hewan
+033. Dokter Spesialis
+034. Dokter Umum
+035. Dosen
+038. Fotografer
+039. Gembala
+040. Gubernur
+041. Guru
+042. Hakim
+043. Hakim Agung
+044. Imam Masjid
+045. Jaksa
+048. Juru Gambar Teknik/Drafter
+049. Kameramen
+050. Kapten Kapal
+051. Kasir
+052. Kepala Desa
+053. Ketua Adat
+054. Ketua Organisasi
+055. Konsultan
+056. Kreator Konten
+058. Kurir
+060. Makelar
+061. Manajer
+063. Mekanik
+069. Operator Mesin
+072. Paraji
+073. Paranormal
+074. Pastor
+075. Pedagang
+076. Pedagang Asongan/Keliling Makanan
+077. Pedagang Asongan/Keliling Nonmakanan
+078. Pedagang Online
+079. Pegawai Pemerintah dengan Perjanjian Kerja (PPPK)
+080. Pekerja Garmen/Konveksi
+081. Pekerja Percetakan
+082. Pekerja Profesional Penjualan (Agen Asuransi, Sales Penjualan, dll)
+083. Pekerja Sosial
+084. Pelaku Ekosistem Musik
+086. Pelaku Ekosistem Seni Pertunjukan
+087. Pelaku Ekosistem Seni Rupa dan Kriya
+088. Pelatih/Instruktur Olahraga
+089. Pelayan Toko
+090. Pembantu/Asisten Rumah Tangga
+091. Pemberi Pinjaman
+092. Pembuat Makanan/Juru Masak
+093. Pembuat Minuman (Barista, Bartender, dll)
+094. Pembuat Rokok/Cerutu/Tembakau Gulung
+095. Pembuat Sepatu dan Tas
+096. Pembudi Daya Ikan dan Biota Air Lainnya
+097. Pemulung
+098. Penagih Hutang (Debt Collector)
+099. Penasihat Spiritual
+100. Penata Busana
+101. Penata Rambut
+102. Penata Rias
+107. Pengacara
+108. Pengasuh Anak (Baby Sitter)
+109. Pengelola Gedung/Properti
+110. Pengemudi Ojek Online
+111. Pengemudi Ojek Pangkalan
+112. Pengepul
+113. Penjaga Keamanan/Satpam
+114. Penjahit
+115. Penulis
+116. Penyelenggara Acara (Event Organizer/EO)
+119. Perajin Batu
+120. Perajin Kayu, Bambu, dan Anyaman
+121. Perajin Kulit dan Tekstil
+122. Perajin Logam
+123. Perajin Perhiasan
+124. Perajin Tembikar/Keramik
+127. Perangkat Desa
+128. Perawat
+129. Petani/Pekebun/Petani Hutan
+130. Peternak
+131. Petugas Pemadam Kebakaran
+132. Petugas Stasiun Pengisian Bahan Bakar
+133. Pilot
+135. PNS Fungsional Tertentu
+136. PNS Fungsional Umum
+137. PNS Struktural
+138. Polisi
+139. Pramugara/i
+140. Pramusaji
+142. Programer
+143. Psikiater
+144. Psikolog
+145. Pustakawan
+146. Resepsionis
+147. Sekretaris
+148. Seniman/Artis
+149. Sopir
+150. Supervisor/Mandor
+151. Tabib
+152. Teknisi
+153. Teller Bank
+154. Tenaga Cuci
+155. Tenaga Humas
+156. Tenaga Kebersihan
+157. Tenaga Tata Usaha
+158. Tentara Nasional Indonesia (TNI)
+159. Tukang Bangunan
+160. Tukang Cat
+161. Tukang Cukur
+162. Tukang Fotokopi
+163. Tukang Gigi
+164. Tukang Kaca
+165. Tukang Kayu
+166. Tukang Kunci
+167. Tukang Las/Pandai Besi
+168. Tukang Listrik
+169. Tukang Pijat
+170. Tukang Pipa
+171. Tukang Sablon
+172. Tukang Sol Sepatu
+173. Tukang Tambal Ban
+174. Tukang Tebang Kayu
+176. Ustaz/Mubalig
+182. Wartawan
+185. Lainnya (tuliskan: ....................................)
+999. Tidak Tahu`;
+
+        async function cariProfesi() {
+    const keyword = document.getElementById('inputProfesi').value.trim();
+    const btn = document.getElementById('btnCari');
+    const hasilBox = document.getElementById('hasilBox');
+    const hasilLabel = document.getElementById('hasilLabel');
+    const hasilProfesi = document.getElementById('hasilProfesi');
+    const hasilKode = document.getElementById('hasilKode');
+    const petunjukSaran = document.getElementById('petunjukSaran');
+
+    if (!keyword) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Mencari...';
+    hasilBox.classList.remove('show', 'error-box');
+    petunjukSaran.classList.remove('show');
+
+    try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`
+    },
+    body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{
+            role: 'user',
+            content: `You are a job classification assistant. Here is the COMPLETE list of available job codes:\n${DAFTAR_PROFESI}\n\nUser typed: "${keyword}"\n\nIMPORTANT RULES:\n1. Choose ONE best match from the list above.\n2. DO NOT invent or make up any job that is NOT in the list.\n3. If no match, return exactly: "185 - Lainnya (tuliskan: ....................................)" followed by "(saran: your suggestion)".\n4. Reply ONLY with this format: "CODE - JOB NAME"\n5. No extra words, no explanation.`
+        }]
+    })
+});
+
+const data = await response.json();
+const jawaban = data.choices[0].message.content.trim();
+
+        if (jawaban.includes('185') && jawaban.includes('saran:')) {
+            const parts = jawaban.split('(saran:');
+            hasilProfesi.textContent = parts[0].trim();
+            hasilKode.textContent = '';
+            petunjukSaran.textContent = 'Saran: ' + parts[1].replace(')', '').trim();
+            petunjukSaran.classList.add('show');
+        } else {
+            hasilProfesi.textContent = jawaban;
+            hasilKode.textContent = 'Pencocokan AI';
+        }
+
+        hasilLabel.textContent = 'Hasil Pencarian';
+        hasilBox.classList.add('show');
+
+    } catch (err) {
+        hasilLabel.textContent = 'Error';
+        hasilProfesi.textContent = 'Gagal menghubungi AI';
+        hasilKode.textContent = 'Periksa koneksi internet';
+        hasilBox.classList.add('error-box', 'show');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Cari Profesi';
+    }
+};
+    </script>
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Laporan Harian PPL</title>
+    <style>
+        :root {
+            --primary: #1565c0;
+            --bg: #f5f7fa;
+            --card: #fff;
+            --text: #222;
+            --border: #ddd;
+            --radius: 14px;
+            --green: #4caf50;
+            --red: #f44336;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Segoe UI", system-ui, sans-serif;
+            background: var(--bg);
+            padding: 16px;
+            color: var(--text);
+        }
+
+        .container { max-width: 600px; margin: 0 auto; }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+        }
+
+        .form-group { margin-bottom: 14px; }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 5px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+        textarea { resize: vertical; min-height: 80px; }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .checkbox-row input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--primary); }
+        .checkbox-row label { flex: 1; margin: 0; font-size: 14px; }
+        .checkbox-row input[type="number"] { width: 100px; text-align: center; }
+        .checkbox-row input[type="number"]:disabled { background: #f5f5f5; color: #aaa; }
+
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-simpan { background: var(--primary); color: #fff; }
+        .btn-batal { background: #e0e0e0; color: #333; }
+        .btn-keluar { background: #F43636; color: #fff; }
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 20px 0 10px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #e8f0fe;
+        }
+
+        #status { text-align: center; margin-top: 10px; font-size: 14px; font-weight: 500; }
+
+        /* Modal konfirmasi batal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: #fff;
+            border-radius: 14px;
+            padding: 24px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .modal-box p { font-size: 16px; margin-bottom: 20px; color: #444; }
+        .modal-box .btn-row button { flex: 1; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; border: none; }
+        .modal-box .btn-ya { background: #f44336; color: #fff; }
+        .modal-box .btn-keluar-ya { background: #4caf50; color: #fff; }
+        .modal-box .btn-tidak { background: #e0e0e0; color: #333; }
+    </style>
+</head>
+
+ 
+<!-- GOOGLE SIGN-IN -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<div id="g_id_onload"
+     data-client_id="YOUR_CLIENT_ID.apps.googleusercontent.com"
+     data-callback="handleCredentialResponse"
+     data-auto_prompt="false">
+</div>
+  
+<body>
+
+    <div class="container">
+        <h1>📋 Laporan Harian Petugas<br>TIM GEBER</h1>
+<div style="text-align:center;margin-bottom:16px;">
+    <div id="loginBtn"></div>
+    <div id="userInfo" style="font-size:14px;color:#555;margin-top:8px;"></div>
+</div>
+        <div class="card">
+            <div class="form-group">
+                <label for="tanggal">📅 Tanggal Pelaporan</label>
+                <input type="date" id="tanggal">
+            </div>
+
+            <div class="form-group">
+                <label for="nama">👤 Nama PPL</label>
+                <select id="nama">
+    <option value="">-- Pilih Petugas --</option>
+    <optgroup label="🏘️ Rajadesa">
+        <option value="SALMAN SOBARI">SALMAN SOBARI</option>
+        <option value="LENA NURLIANA">LENA NURLIANA</option>
+        <option value="LINA HERLINA">LINA HERLINA</option>
+        <option value="NINA DESIYANTI">NINA DESIYANTI</option>
+        <option value="HERAWATI">HERAWATI</option>
+    </optgroup>
+    <optgroup label="🏘️ Purwaraja">
+        <option value="EHAT HAYATI">EHAT HAYATI</option>
+        <option value="UHER HERNAWAN">UHER HERNAWAN</option>
+    </optgroup>
+</select>
+            </div>
+
+            <div class="section-title">📊 Progres Pendataan Usaha Harian</div>
+            <div class="checkbox-row">
+                <input type="checkbox" id="cbOnline" onchange="toggleJumlah('cbOnline','jumlahOnline')">
+                <label for="cbOnline">🛒 Usaha Online (Pedagang Online)</label>
+                <input type="number" id="jumlahOnline" value="0" min="0" disabled>
+            </div>
+            <div class="checkbox-row">
+                <input type="checkbox" id="cbCreator" onchange="toggleJumlah('cbCreator','jumlahCreator')">
+                <label for="cbCreator">🎥 Influenser / Youtuber / Content Creator</label>
+                <input type="number" id="jumlahCreator" value="0" min="0" disabled>
+            </div>
+            <div class="checkbox-row">
+                <input type="checkbox" id="cbBiasa" onchange="toggleJumlah('cbBiasa','jumlahBiasa')">
+                <label for="cbBiasa">🏪 Usaha Lainnya</label>
+                <input type="number" id="jumlahBiasa" value="0" min="0" disabled>
+            </div>
+
+            <div class="section-title">⚠️ Kendala Lapangan yang Dihadapi Hari Ini</div>
+            <div class="form-group">
+                <textarea id="kendalaLapangan" placeholder="Tulis kendala di lapangan..."></textarea>
+            </div>
+
+            <div class="section-title">📱 Kendala Aplikasi FASIH yang Dihadapi Hari Ini</div>
+            <div class="form-group">
+                <textarea id="kendalaAplikasi" placeholder="Tulis kendala aplikasi FASIH..."></textarea>
+            </div>
+
+            <div class="btn-row">
+    <button class="btn-keluar" onclick="konfirmasiKeluar()">🚪 Keluar</button>
+    <button class="btn-batal" onclick="konfirmasiBatal()">❌ Batal</button>
+    <button class="btn-simpan" id="btnSimpan" onclick="konfirmasiSimpan()">💾 Simpan</button>
+</div>
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <!-- MODAL KONFIRMASI BATAL -->
+    <div class="modal-overlay" id="modalBatal">
+        <div class="modal-box">
+            <p>Yakin ingin batal?<br>Data yang diisi akan hilang.</p>
+            <div class="btn-row">
+                <button class="btn-tidak" onclick="tutupModalBatal()">Tidak</button>
+                <button class="btn-ya" onclick="batal()">Ya, Batal</button>
+            </div>
+        </div>
+    </div>
+  
+  <!-- MODAL KONFIRMASI KELUAR -->
+<div class="modal-overlay" id="modalKeluar">
+    <div class="modal-box">
+        <p>Pastikan Dulu Sudah Tersimpan?<br>Jika Sudah, Terimakasih Banyak </p>
+        <div class="btn-row">
+            <button class="btn-tidak" onclick="tutupModalKeluar()">Tidak</button>
+            <button class="btn-keluar-ya" onclick="keluar()">Sudah Yakin</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL KONFIRMASI SIMPAN -->
+<div class="modal-overlay" id="modalSimpan">
+    <div class="modal-box">
+        <p>Simpan laporan ini?</p>
+        <div class="btn-row">
+            <button class="btn-tidak" onclick="tutupModalSimpan()">Tidak</button>
+            <button class="btn-keluar-ya" onclick="simpan()">Ya, Simpan</button>
+        </div>
+    </div>
+</div>
+
+  
+    <script>
+        const STORAGE_KEY = 'laporan_ppl';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxF6WcGlLRurbLSRgLjeHrhWBfiGZXQS89oNxji8mL8LOzp23FUYDmbwhQC-Vn1b582/exec';
+
+        const params = new URLSearchParams(window.location.search);
+        const mode = params.get('mode');
+
+        function getLaporan() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+        function setLaporan(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+        function toggleJumlah(cbId, inputId) {
+            const cb = document.getElementById(cbId);
+            const input = document.getElementById(inputId);
+            input.disabled = !cb.checked;
+            if (!cb.checked) input.value = '0';
+        }
+
+        function konfirmasiBatal() {
+            document.getElementById('modalBatal').classList.add('show');
+        }
+
+        function tutupModalBatal() {
+            document.getElementById('modalBatal').classList.remove('show');
+        }
+        function konfirmasiKeluar() {
+    document.getElementById('modalKeluar').classList.add('show');
+}
+
+function tutupModalKeluar() {
+    document.getElementById('modalKeluar').classList.remove('show');
+}
+
+function konfirmasiSimpan() {
+    document.getElementById('modalSimpan').classList.add('show');
+}
+
+function tutupModalSimpan() {
+    document.getElementById('modalSimpan').classList.remove('show');
+}
+      
+function keluar() {
+    window.location.href = 'index.html';
+}
+        function batal() {
+            window.location.href = 'index.html';
+        }
+
+     function simpan() {
+    tutupModalSimpan();
+    
+    const id = Date.now().toString();
+    const laporan = getLaporan();
+    
+    if (mode === 'edit') {
+        const editId = localStorage.getItem('edit_id');
+        const index = laporan.findIndex(l => l.id === editId);
+        if (index > -1) laporan[index] = ambilData(laporan[index].id);
+    } else {
+        laporan.push(ambilData(id));
+    }
+            setLaporan(laporan);
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST', mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: laporan })
+            }).catch(() => {});
+
+            document.getElementById('status').textContent = '✅ Laporan berhasil disimpan!';
+            document.getElementById('status').style.color = '#4caf50';
+            setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+        }
+
+        function ambilData(id) {
+            return {
+                id, tanggal: document.getElementById('tanggal').value,
+                nama: document.getElementById('nama').value,
+                cbOnline: document.getElementById('cbOnline').checked,
+                jumlahOnline: document.getElementById('jumlahOnline').value,
+                cbCreator: document.getElementById('cbCreator').checked,
+                jumlahCreator: document.getElementById('jumlahCreator').value,
+                cbBiasa: document.getElementById('cbBiasa').checked,
+                jumlahBiasa: document.getElementById('jumlahBiasa').value,
+                kendalaLapangan: document.getElementById('kendalaLapangan').value,
+                kendalaAplikasi: document.getElementById('kendalaAplikasi').value
+            };
+        }
+
+        function isiForm(data) {
+            document.getElementById('tanggal').value = data.tanggal || '';
+            document.getElementById('nama').value = data.nama || '';
+            document.getElementById('cbOnline').checked = data.cbOnline || false;
+            document.getElementById('jumlahOnline').value = data.jumlahOnline || '0';
+            document.getElementById('jumlahOnline').disabled = !data.cbOnline;
+            document.getElementById('cbCreator').checked = data.cbCreator || false;
+            document.getElementById('jumlahCreator').value = data.jumlahCreator || '0';
+            document.getElementById('jumlahCreator').disabled = !data.cbCreator;
+            document.getElementById('cbBiasa').checked = data.cbBiasa || false;
+            document.getElementById('jumlahBiasa').value = data.jumlahBiasa || '0';
+            document.getElementById('jumlahBiasa').disabled = !data.cbBiasa;
+            document.getElementById('kendalaLapangan').value = data.kendalaLapangan || '';
+            document.getElementById('kendalaAplikasi').value = data.kendalaAplikasi || '';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (mode === 'edit') {
+                const editId = localStorage.getItem('edit_id');
+                const data = getLaporan().find(l => l.id === editId);
+                if (data) isiForm(data);
+            } else {
+                document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
+            }
+        });
+    </script>
+</body>
+</html>

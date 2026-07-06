@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Kalkulator usaha restoran/rumah makan">
+    <title>Kalkulator Restoran</title>
+    <link rel="stylesheet" href="../css/kalkulator.css">
+</head>
+<body>
+
+    <div class="container">
+
+        <header class="header">
+            <div class="logo" aria-hidden="true">🍽️</div>
+            <div class="judul">
+                <h1>PERKIRAAN PERHITUNGAN</h1>
+                <h2>RESTORAN / RUMAH MAKAN</h2>
+                <h3>Per Tahun</h3>
+            </div>
+        </header>
+
+        <section class="input-box">
+            <div class="section-title">INPUT DATA</div>
+            <div class="grid">
+
+                <!-- Pegawai -->
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:0;">
+                        <input type="checkbox" id="cbPegawai" onchange="togglePegawai()" style="width:20px;height:20px;">
+                        Punya Pegawai?
+                    </label>
+                </div>
+                <div class="row-inline input-disabled" id="rowPegawai" style="grid-column:1/-1;">
+                    <div class="form-group">
+                        <label for="jumlahPegawai">Jumlah</label>
+                        <input type="number" id="jumlahPegawai" value="0" min="0" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="gajiPegawai">Gaji/bulan (Rp)</label>
+                        <input type="text" id="gajiPegawai" value="0" disabled autocomplete="off">
+                    </div>
+                </div>
+
+                <!-- Belanja Bahan -->
+                <div class="form-group">
+                    <label for="belanja">Belanja Bahan Baku (Rp)</label>
+                    <input type="text" id="belanja" value="300.000" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label>Periode Belanja</label>
+                    <div style="display:flex;gap:12px;padding-top:8px;">
+                        <label style="display:flex;align-items:center;gap:4px;font-weight:400;">
+                            <input type="radio" name="periode" value="harian" checked onchange="hitung()"> Harian
+                        </label>
+                        <label style="display:flex;align-items:center;gap:4px;font-weight:400;">
+                            <input type="radio" name="periode" value="mingguan" onchange="hitung()"> Mingguan
+                        </label>
+                        <label style="display:flex;align-items:center;gap:4px;font-weight:400;">
+                            <input type="radio" name="periode" value="bulanan" onchange="hitung()"> Bulanan
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Pendapatan Kotor -->
+                <div class="form-group">
+                    <label for="pendapatan">Pendapatan Kotor (Rp)</label>
+                    <input type="text" id="pendapatan" value="800.000" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label>Periode Pendapatan</label>
+                    <div style="display:flex;gap:12px;padding-top:8px;">
+                        <label style="display:flex;align-items:center;gap:4px;font-weight:400;">
+                            <input type="radio" name="periodePendapatan" value="harian" checked onchange="hitung()"> Harian
+                        </label>
+                        <label style="display:flex;align-items:center;gap:4px;font-weight:400;">
+                            <input type="radio" name="periodePendapatan" value="mingguan" onchange="hitung()"> Mingguan
+                        </label>
+                        <label style="display:flex;align-items:center;gap:4px;font-weight:400;">
+                            <input type="radio" name="periodePendapatan" value="bulanan" onchange="hitung()"> Bulanan
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Pengeluaran Bulanan -->
+                <div class="form-group">
+                    <label for="pengeluaranBulanan">Pengeluaran Bulanan (Rp)</label>
+                    <input type="text" id="pengeluaranBulanan" value="" placeholder="Gas, listrik, air, kebersihan, dll." autocomplete="off">
+                </div>
+
+                <!-- Tanah & Bangunan -->
+                <div class="row-inline" style="grid-column:1/-1;">
+                    <div class="form-group">
+                        <label for="panjang">Panjang (m)</label>
+                        <input type="number" id="panjang" value="6" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="lebar">Lebar (m)</label>
+                        <input type="number" id="lebar" value="8" min="0">
+                    </div>
+                </div>
+
+                <div class="row-inline" style="grid-column:1/-1;">
+                    <div class="form-group">
+                        <label for="hargaTanah">Harga/Bata (Rp)</label>
+                        <input type="text" id="hargaTanah" value="1.000.000" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Jenis Bangunan</label>
+                        <div style="display:flex;gap:8px;padding-top:6px;flex-wrap:wrap;">
+                            <label style="display:flex;align-items:center;gap:4px;font-weight:400;">
+                                <input type="radio" name="jenisBangunan" value="modern" onchange="hitung()"> Modern
+                            </label>
+                            <label style="display:flex;align-items:center;gap:4px;font-weight:400;">
+                                <input type="radio" name="jenisBangunan" value="permanen" checked onchange="hitung()"> Permanen
+                            </label>
+                            <label style="display:flex;align-items:center;gap:4px;font-weight:400;">
+                                <input type="radio" name="jenisBangunan" value="semi" onchange="hitung()"> Semi
+                            </label>
+                            <label style="display:flex;align-items:center;gap:4px;font-weight:400;">
+                                <input type="radio" name="jenisBangunan" value="kayu" onchange="hitung()"> Kayu
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nilai Peralatan -->
+                <div class="form-group">
+                    <label for="nilaiPeralatan">Nilai Peralatan - opsional (Rp)</label>
+                    <input type="text" id="nilaiPeralatan" value="" placeholder="Peralatan dapur, meja kursi, etalase, dll." autocomplete="off">
+                </div>
+
+            </div>
+        </section>
+
+        <nav class="tab-menu" role="tablist">
+            <button class="tab active" data-tab="pengeluaran">Pengeluaran</button>
+            <button class="tab" data-tab="tabPendapatan">Pendapatan</button>
+            <button class="tab" data-tab="aset">Aset</button>
+        </nav>
+
+        <!-- ==================== TAB PENGELUARAN ==================== -->
+        <section id="pengeluaran" class="tab-content aktif" role="tabpanel">
+            <div class="card">
+                <h3 class="card-title">26. Rincian Pengeluaran Tahun 2025</h3>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">a. Total upah dan gaji, serta jaminan sosial pegawai</h4>
+                    <div class="btn-copy-row" id="btn-rTotalUpah" data-target="rTotalUpah">
+                        <span class="btn-label">Total Upah dan Gaji</span>
+                        <span class="btn-value" id="rTotalUpah">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">b. Biaya produksi</h4>
+                    <div class="list-item">
+                        <span class="label">Biaya Produksi (bumbu, gas, dll)</span>
+                        <span class="value" id="rTotalProduksi">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">c. Biaya pembelian barang yang terjual</h4>
+                    <div class="btn-copy-row" id="btn-rTotalPembelian" data-target="rTotalPembelian">
+                        <span class="btn-label">Total Pembelian Bahan Baku</span>
+                        <span class="btn-value" id="rTotalPembelian">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">d. Biaya operasional</h4>
+                    <div class="btn-copy-row" id="btn-rTotalOperasional" data-target="rTotalOperasional">
+                        <span class="btn-label">Total Biaya Operasional</span>
+                        <span class="btn-value" id="rTotalOperasional">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">e. Biaya nonoperasional</h4>
+                    <div class="list-item">
+                        <span class="label">Biaya Tak Terduga (1% belanja)</span>
+                        <span class="value" id="rNonOps">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="kategori total-pengeluaran">
+                    <h4 class="kategori-title">f. Total pengeluaran</h4>
+                    <div class="list-item highlight-static">
+                        <span class="label">Total Pengeluaran</span>
+                        <span class="value" id="rTotalPengeluaran">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB PENDAPATAN ==================== -->
+        <section id="tabPendapatan" class="tab-content" role="tabpanel">
+            <div class="card">
+                <h3 class="card-title">27. Rincian Nilai Pendapatan Tahun 2025</h3>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">a. Nilai produksi/penjualan/pendapatan barang dan jasa</h4>
+                    <div class="btn-copy-row" id="btn-rPendapatanKotor" data-target="rPendapatanKotor">
+                        <span class="btn-label">Pendapatan Kotor per Tahun</span>
+                        <span class="btn-value" id="rPendapatanKotor">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">b. Pendapatan lainnya yang dihasilkan</h4>
+                    <div class="list-item">
+                        <span class="label">Pendapatan Lain (catering, dll)</span>
+                        <span class="value" id="rPendapatanLain">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">c. Total nilai pendapatan</h4>
+                    <div class="list-item highlight-static">
+                        <span class="label">Total Pendapatan</span>
+                        <span class="value" id="rTotalPendapatan">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">18.b. pendapatan dari keuntungan usaha (per Bulan)</h4>
+                    <div class="btn-copy-row" id="btn-rLabaBersih" data-target="rLabaBersih">
+                        <span class="btn-label">Laba Bersih per Bulan</span>
+                        <span class="btn-value" id="rLabaBersih">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB ASET ==================== -->
+        <section id="aset" class="tab-content" role="tabpanel">
+            <div class="card">
+                <h3 class="card-title">28. Nilai aset pada 31 Desember 2025</h3>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">a. Nilai aset tanah dan bangunan</h4>
+                    <div class="btn-copy-row" id="btn-rAsetTanah" data-target="rAsetTanah">
+                        <span class="btn-label">Nilai Aset Tanah & Bangunan</span>
+                        <span class="btn-value" id="rAsetTanah">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">b. Nilai aset selain tanah dan bangunan</h4>
+                    <div class="list-item">
+                        <span class="label">Nilai Peralatan</span>
+                        <span class="value" id="rAsetPeralatan">Rp 0</span>
+                    </div>
+                    <div class="btn-copy-row" id="btn-rTotalAset" data-target="rTotalAset">
+                        <span class="btn-label">Total Aset Selain Tanah</span>
+                        <span class="btn-value" id="rTotalAset">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">d. Luas tanah yang dikuasai untuk usaha</h4>
+                    <div class="list-item">
+                        <span class="label">1 Bata = 14 m²</span>
+                        <span class="value"></span>
+                    </div>
+                    <div class="btn-copy-row" id="btn-rLuas" data-target="rLuas">
+                        <span class="btn-label">Luas (m²)</span>
+                        <span class="btn-value" id="rLuas">0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script src="script.js" defer></script>
+</body>
+</html>

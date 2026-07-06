@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Kalkulator usaha hasil hutan kayu - hitung biaya tanam, perawatan, dan keuntungan">
+    <title>Kalkulator Hasil Hutan Kayu</title>
+    <link rel="stylesheet" href="../css/kalkulator.css">
+</head>
+<body>
+
+    <div class="container">
+
+        <header class="header">
+            <div class="logo" aria-hidden="true">🪵</div>
+            <div class="judul">
+                <h1>PERKIRAAN PERHITUNGAN</h1>
+                <h2>HASIL HUTAN KAYU</h2>
+                <h3>Per Kebun / Per Siklus Tebang</h3>
+            </div>
+        </header>
+
+        <section class="input-box">
+            <div class="section-title">INPUT DATA</div>
+            <div class="grid">
+
+                <div class="form-group">
+                    <label for="bata">Luas Lahan (Bata)</label>
+                    <input type="number" id="bata" value="100" min="0" max="10000">
+                </div>
+
+                <div class="form-group">
+                    <label for="jumlah">Jumlah Pohon Ditanam</label>
+                    <input type="number" id="jumlah" value="500" min="0" max="100000">
+                </div>
+
+                <div class="form-group">
+                    <label for="hidup">Pohon Hidup Saat Tebang</label>
+                    <input type="number" id="hidup" value="400" min="0" max="100000">
+                </div>
+
+                <div class="form-group">
+                    <label for="usia">Usia Siap Tebang (Tahun)</label>
+                    <input type="number" id="usia" value="5" min="1" max="30">
+                </div>
+
+                <div class="form-group">
+                    <label for="hb">Harga Tanah per Bata (Rp)</label>
+                    <input type="text" id="hb" value="500.000" placeholder="Contoh: 500.000" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label for="hg">Harga Jual Kayu per Pohon (Rp)</label>
+                    <input type="text" id="hg" value="350.000" placeholder="Contoh: 350.000" autocomplete="off">
+                </div>
+
+            </div>
+        </section>
+
+        <nav class="tab-menu" role="tablist">
+            <button class="tab active" data-tab="pengeluaran" role="tab" aria-selected="true">Pengeluaran</button>
+            <button class="tab" data-tab="pendapatan" role="tab" aria-selected="false">Pendapatan</button>
+            <button class="tab" data-tab="aset" role="tab" aria-selected="false">Aset</button>
+        </nav>
+
+        <!-- ==================== TAB PENGELUARAN ==================== -->
+        <section id="pengeluaran" class="tab-content aktif" role="tabpanel">
+            <div class="card">
+                <h3 class="card-title">26. Rincian Pengeluaran Tahun 2025</h3>
+
+                <!-- a. Upah -->
+                <div class="kategori">
+                    <h4 class="kategori-title">a. Total upah dan gaji, serta jaminan sosial pegawai</h4>
+                    <div class="list-item">
+                        <span class="label">Upah Tanam per Pohon</span>
+                        <span class="value">Rp 5.000/pohon</span>
+                    </div>
+                    <div class="list-item">
+                        <span class="label">Upah Perawatan per Tahun</span>
+                        <span class="value">Rp 2.000/pohon/tahun</span>
+                    </div>
+                    <div class="btn-copy-row" id="btn-rUpah" data-target="rUpah">
+                        <span class="btn-label">Total Upah Kerja</span>
+                        <span class="btn-value" id="rUpah">Rp 0</span>
+                    </div>
+                </div>
+
+                <!-- b. Biaya produksi -->
+                <div class="kategori">
+                    <h4 class="kategori-title">b. Biaya produksi</h4>
+                    <div class="list-item">
+                        <span class="label">Biaya Bibit</span>
+                        <span class="value" id="rBibit">Rp 0</span>
+                    </div>
+                    <div class="list-item">
+                        <span class="label">Biaya Pupuk</span>
+                        <span class="value" id="rPupuk">Rp 0</span>
+                    </div>
+                    <div class="list-item">
+                        <span class="label">Pestisida & Obat</span>
+                        <span class="value" id="rObat">Rp 0</span>
+                    </div>
+                    <div class="list-item">
+                        <span class="label">Biaya Tebang per Pohon</span>
+                        <span class="value">Rp 15.000/pohon hidup</span>
+                    </div>
+                    <div class="list-item">
+                        <span class="label">Total Biaya Tebang</span>
+                        <span class="value" id="rTebang">Rp 0</span>
+                    </div>
+                    <div class="btn-copy-row" id="btn-rTotalProduksi" data-target="rTotalProduksi">
+                        <span class="btn-label">Total Biaya Produksi</span>
+                        <span class="btn-value" id="rTotalProduksi">Rp 0</span>
+                    </div>
+                </div>
+
+                <!-- d. Biaya operasional -->
+                <div class="kategori">
+                    <h4 class="kategori-title">d. Biaya operasional</h4>
+                    <div class="list-item">
+                        <span class="label">Angkut Kayu</span>
+                        <span class="value" id="rAngkut">Rp 0</span>
+                    </div>
+                    <div class="list-item">
+                        <span class="label">Pungutan / Retribusi</span>
+                        <span class="value" id="rPungutan">Rp 0</span>
+                    </div>
+                    <div class="btn-copy-row" id="btn-rTotalOperasional" data-target="rTotalOperasional">
+                        <span class="btn-label">Total Biaya Operasional</span>
+                        <span class="btn-value" id="rTotalOperasional">Rp 0</span>
+                    </div>
+                </div>
+
+                <!-- f. Total pengeluaran -->
+                <div class="kategori total-pengeluaran">
+                    <h4 class="kategori-title">f. Total pengeluaran</h4>
+                    <div class="list-item highlight-static">
+                        <span class="label">Total Pengeluaran</span>
+                        <span class="value" id="rTotalPengeluaran">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB PENDAPATAN ==================== -->
+        <section id="pendapatan" class="tab-content" role="tabpanel">
+            <div class="card">
+                <h3 class="card-title">27. Rincian Nilai Pendapatan Tahun 2025</h3>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">a. Nilai produksi/penjualan/pendapatan barang dan jasa</h4>
+                    <div class="list-item">
+                        <span class="label">Pohon Hidup Saat Tebang</span>
+                        <span class="value" id="rPohonHidup">0</span>
+                    </div>
+                    <div class="btn-copy-row" id="btn-rPendapatanKotor" data-target="rPendapatanKotor">
+                        <span class="btn-label">Hasil Pendapatan Kayu (Rp)</span>
+                        <span class="btn-value" id="rPendapatanKotor">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">c. Total nilai produksi/penjualan/pendapatan</h4>
+                    <div class="list-item highlight-static">
+                        <span class="label">Total Pendapatan</span>
+                        <span class="value" id="rTotalPendapatan">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">18.b. pendapatan dari keuntungan usaha (per Bulan)</h4>
+                    <div class="btn-copy-row" id="btn-rLabaBulan" data-target="rLabaBulan">
+                        <span class="btn-label">Keuntungan Bersih per Bulan</span>
+                        <span class="btn-value" id="rLabaBulan">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB ASET ==================== -->
+        <section id="aset" class="tab-content" role="tabpanel">
+            <div class="card">
+                <h3 class="card-title">28. Nilai aset pada 31 Desember 2025</h3>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">a. Nilai aset tanah dan bangunan</h4>
+                    <div class="btn-copy-row" id="btn-rNilaiTanah" data-target="rNilaiTanah">
+                        <span class="btn-label">Nilai Aset Tanah</span>
+                        <span class="btn-value" id="rNilaiTanah">Rp 0</span>
+                    </div>
+                    <div class="list-item">
+                        <span class="label">Nilai Pohon Berdiri (estimasi)</span>
+                        <span class="value" id="rNilaiPohon">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="kategori">
+                    <h4 class="kategori-title">d. Luas tanah yang dikuasai dan digunakan untuk usaha</h4>
+                    <div class="list-item">
+                        <span class="label">Jarak tanam: 3m × 3m</span>
+                        <span class="value"></span>
+                    </div>
+                    <div class="list-item">
+                        <span class="label">1 Bata = 14 m²</span>
+                        <span class="value"></span>
+                    </div>
+                    <div class="btn-copy-row" id="btn-rLuas" data-target="rLuas">
+                        <span class="btn-label">Luas (m²)</span>
+                        <span class="btn-value" id="rLuas">0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+<a href="../index.html">← Kembali</a>
+    </div>
+
+    <script src="script.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Laporan PPL</title>
+    <style>
+        :root {
+            --primary: #1565c0;
+            --bg: #f5f7fa;
+            --card: #fff;
+            --text: #222;
+            --border: #ddd;
+            --radius: 14px;
+            --green: #4caf50;
+            --orange: #ff9800;
+            --red: #f44336;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Segoe UI", system-ui, sans-serif;
+            background: var(--bg);
+            padding: 16px;
+            color: var(--text);
+            min-height: 100dvh;
+        }
+
+        .container { max-width: 600px; margin: 0 auto; }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .top-bar h1 { font-size: 22px; color: var(--primary); }
+
+        .btn-keluar {
+            background: var(--red);
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+        }
+
+        .kategori-title { font-size: 16px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+        .kategori-sub { font-size: 14px; color: #555; margin-bottom: 12px; }
+
+        .row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn-tambah {
+            background: var(--green);
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .total-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .total-item:last-child { border-bottom: none; }
+        .total-item .label { color: #555; font-size: 14px; }
+        .total-item .value { font-weight: 700; font-size: 16px; color: var(--text); }
+
+        .keterangan {
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .laporan-item {
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        .laporan-item .tgl { font-size: 12px; color: #888; }
+        .laporan-item .nama { font-weight: 700; font-size: 15px; }
+        .laporan-item .ringkasan { font-size: 13px; color: #555; margin: 4px 0; }
+        .laporan-item .aksi { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+
+        .btn-view, .btn-edit, .btn-buang {
+            border: none;
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            color: #fff;
+        }
+        .btn-view { background: var(--primary); }
+        .btn-edit { background: var(--orange); }
+        .btn-buang { background: var(--red); }
+
+        .kosong { text-align: center; color: #999; padding: 20px; }
+
+        /* ========== MODAL ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .modal-overlay.show { display: flex; }
+
+        .modal-box {
+            background: #fff;
+            border-radius: 14px;
+            padding: 20px;
+            width: 100%;
+            max-width: 550px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .modal-box h2 {
+            color: var(--primary);
+            margin-bottom: 16px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .modal-box .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        .modal-box .info-row .label { color: #666; }
+        .modal-box .info-row .value { font-weight: 600; }
+
+        .modal-box .section-label {
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 14px;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .modal-box textarea {
+            width: 100%;
+            min-height: 60px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .modal-box .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .modal-box .btn-row button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .modal-box .btn-tutup {
+            background: #e0e0e0;
+            color: #333;
+        }
+        .modal-box .btn-simpan-modal {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        @media (max-width: 400px) {
+            .btn-tambah { width: 100%; text-align: center; }
+            .modal-box { padding: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <div class="top-bar">
+            <h1>📊 Dashboard PPL</h1>
+            <button class="btn-keluar" onclick="konfirmasiKeluar()">🚪 Keluar</button>
+        </div>
+
+        <!-- LAPORAN HARIAN -->
+        <div class="card">
+            <div class="row-header">
+                <div>
+                    <div class="kategori-title">📋 Laporan Harian PPL</div>
+                    <div class="kategori-sub">Progres Pendataan Usaha</div>
+                </div>
+                <button class="btn-tambah" onclick="tambahLaporan()">➕ Tambah Laporan</button>
+            </div>
+        </div>
+
+        <!-- TOTAL USAHA -->
+        <div class="card">
+            <div class="kategori-title">📈 Total Usaha Terdata</div>
+            <div class="total-item"><span class="label">🛒 Pedagang Online</span><span class="value" id="totalOnline">0</span></div>
+            <div class="total-item"><span class="label">🎥 Content Creator</span><span class="value" id="totalCreator">0</span></div>
+            <div class="total-item"><span class="label">🏪 Usaha Biasa</span><span class="value" id="totalBiasa">0</span></div>
+            <div class="total-item" style="font-weight:700;background:#f0f4ff;margin-top:8px;padding:10px;border-radius:8px;">
+                <span class="label">Total Keseluruhan</span><span class="value" id="totalSemua">0</span>
+            </div>
+            <div class="keterangan">* Total usaha terdata mulai 1 Juni 2026, bukan dari awal pendataan</div>
+        </div>
+
+        <!-- LAPORAN LALU -->
+        <div class="card">
+            <div class="kategori-title">📂 Laporan Sebelumnya</div>
+            <div id="daftarLaporan"><div class="kosong">Belum ada laporan</div></div>
+        </div>
+
+    </div>
+
+    <!-- MODAL VIEW / EDIT -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box" id="modalBox"></div>
+    </div>
+<!-- MODAL KONFIRMASI KELUAR -->
+<div class="modal-overlay" id="modalKeluar">
+    <div class="modal-box">
+        <p>Kembali ke halaman utama?</p>
+        <div class="btn-row">
+            <button class="btn-tutup" onclick="tutupModalKeluar()">Tidak</button>
+            <button class="btn-simpan-modal" onclick="keluar()">Ya, Keluar</button>
+        </div>
+    </div>
+</div>
+    <script>
+        const STORAGE_KEY = 'laporan_ppl';
+
+        function getLaporan() {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        }
+
+        function setLaporan(data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function keluar() {
+    if (confirm('Kembali ke halaman utama?')) window.location.href = '../index.html';
+}
+
+function konfirmasiKeluar() {
+    document.getElementById('modalKeluar').classList.add('show');
+}
+
+function tutupModalKeluar() {
+    document.getElementById('modalKeluar').classList.remove('show');
+}
+
+        function tambahLaporan() {
+            window.location.href = 'form.html';
+        }
+
+        // ========== VIEW MODAL ==========
+        function viewLaporan(id) {
+            const data = getLaporan().find(l => l.id === id);
+            if (!data) return;
+            const html = `
+                <h2>👁 Detail Laporan</h2>
+                <div class="info-row"><span class="label">Tanggal</span><span class="value">${data.tanggal||'-'}</span></div>
+                <div class="info-row"><span class="label">Nama PPL</span><span class="value">${data.nama||'-'}</span></div>
+                <div class="section-label">📊 Progres Pendataan</div>
+                <div class="info-row"><span class="label">Usaha Online</span><span class="value">${data.jumlahOnline||0}</span></div>
+                <div class="info-row"><span class="label">Content Creator</span><span class="value">${data.jumlahCreator||0}</span></div>
+                <div class="info-row"><span class="label">Usaha Biasa</span><span class="value">${data.jumlahBiasa||0}</span></div>
+                <div class="section-label">⚠️ Kendala Lapangan</div>
+                <p style="font-size:14px;color:#555;">${data.kendalaLapangan||'-'}</p>
+                <div class="section-label">📱 Kendala Aplikasi FASIH</div>
+                <p style="font-size:14px;color:#555;">${data.kendalaAplikasi||'-'}</p>
+                <div class="btn-row">
+                    <button class="btn-tutup" onclick="tutupModal()">❌ Tutup</button>
+                </div>
+            `;
+            bukaModal(html);
+        }
+
+        // ========== EDIT MODAL ==========
+        function editLaporan(id) {
+            const data = getLaporan().find(l => l.id === id);
+            if (!data) return;
+            const html = `
+                <h2>✏️ Edit Laporan</h2>
+                <div class="form-group"><label>Tanggal</label><input type="date" id="editTanggal" value="${data.tanggal||''}"></div>
+                <div class="form-group"><label>Nama PPL</label>
+                    <select id="editNama">
+                        ${['Ehat Hayati','UHER HERNAWAN','Petugas 3','Petugas 4','Petugas 5','Petugas 6','Petugas 7']
+                            .map(n => `<option value="${n}" ${data.nama===n?'selected':''}>${n}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="section-label">📊 Progres Pendataan</div>
+                <div class="info-row"><span class="label">Usaha Online</span><input type="number" id="editOnline" value="${data.jumlahOnline||0}" style="width:80px;text-align:center;"></div>
+                <div class="info-row"><span class="label">Content Creator</span><input type="number" id="editCreator" value="${data.jumlahCreator||0}" style="width:80px;text-align:center;"></div>
+                <div class="info-row"><span class="label">Usaha Biasa</span><input type="number" id="editBiasa" value="${data.jumlahBiasa||0}" style="width:80px;text-align:center;"></div>
+                <div class="section-label">⚠️ Kendala Lapangan</div>
+                <textarea id="editKendalaLapangan">${data.kendalaLapangan||''}</textarea>
+                <div class="section-label">📱 Kendala Aplikasi FASIH</div>
+                <textarea id="editKendalaAplikasi">${data.kendalaAplikasi||''}</textarea>
+                <div class="btn-row">
+                    <button class="btn-tutup" onclick="tutupModal()">❌ Batal</button>
+                    <button class="btn-simpan-modal" onclick="simpanEdit('${id}')">💾 Simpan</button>
+                </div>
+            `;
+            bukaModal(html);
+        }
+
+        function simpanEdit(id) {
+            const laporan = getLaporan();
+            const index = laporan.findIndex(l => l.id === id);
+            if (index === -1) return;
+            laporan[index] = {
+                ...laporan[index],
+                tanggal: document.getElementById('editTanggal').value,
+                nama: document.getElementById('editNama').value,
+                jumlahOnline: document.getElementById('editOnline').value,
+                jumlahCreator: document.getElementById('editCreator').value,
+                jumlahBiasa: document.getElementById('editBiasa').value,
+                kendalaLapangan: document.getElementById('editKendalaLapangan').value,
+                kendalaAplikasi: document.getElementById('editKendalaAplikasi').value
+            };
+            setLaporan(laporan);
+            tutupModal();
+            render();
+        }
+
+        function buangLaporan(id) {
+            if (!confirm('Yakin hapus laporan ini?')) return;
+            const laporan = getLaporan().filter(l => l.id !== id);
+            setLaporan(laporan);
+            render();
+        }
+
+        function bukaModal(html) {
+            document.getElementById('modalBox').innerHTML = html;
+            document.getElementById('modalOverlay').classList.add('show');
+        }
+
+        function tutupModal() {
+            document.getElementById('modalOverlay').classList.remove('show');
+        }
+
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) tutupModal();
+        });
+
+        // ========== RENDER ==========
+        function render() {
+            const laporan = getLaporan();
+            let online = 0, creator = 0, biasa = 0;
+            laporan.forEach(l => {
+                online += Number(l.jumlahOnline || 0);
+                creator += Number(l.jumlahCreator || 0);
+                biasa += Number(l.jumlahBiasa || 0);
+            });
+            document.getElementById('totalOnline').textContent = online.toLocaleString('id-ID');
+            document.getElementById('totalCreator').textContent = creator.toLocaleString('id-ID');
+            document.getElementById('totalBiasa').textContent = biasa.toLocaleString('id-ID');
+            document.getElementById('totalSemua').textContent = (online + creator + biasa).toLocaleString('id-ID');
+
+            const container = document.getElementById('daftarLaporan');
+            if (laporan.length === 0) {
+                container.innerHTML = '<div class="kosong">Belum ada laporan</div>';
+                return;
+            }
+            container.innerHTML = laporan
+                .sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal))
+                .map(l => `
+                    <div class="laporan-item">
+                        <div class="tgl">📅 ${l.tanggal || '-'}</div>
+                        <div class="nama">👤 ${l.nama || '-'}</div>
+                        <div class="ringkasan">
+                            Online: ${Number(l.jumlahOnline||0).toLocaleString('id-ID')} | 
+                            Creator: ${Number(l.jumlahCreator||0).toLocaleString('id-ID')} | 
+                            Biasa: ${Number(l.jumlahBiasa||0).toLocaleString('id-ID')}
+                        </div>
+                        <div class="aksi">
+                            <button class="btn-view" onclick="viewLaporan('${l.id}')">👁 View</button>
+                            <button class="btn-edit" onclick="editLaporan('${l.id}')">✏️ Edit</button>
+                            <button class="btn-buang" onclick="buangLaporan('${l.id}')">🗑 Buang</button>
+                        </div>
+                    </div>
+                `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', render);
+    </script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+/* =========================================
+   LIVE REPORT CSS - Tema Landing Page
+========================================= */
+:root {
+    --primary: #006e16;
+    --primary-hover: #00881c;
+    --primary-alpha: rgba(0, 110, 22, 0.12);
+    --bg: #f5f7f6;
+    --card: #ffffff;
+    --text: #222;
+    --text-light: #666;
+    --border: #e2e8e4;
+    --radius: 18px;
+    --radius-sm: 10px;
+    --radius-md: 12px;
+    --radius-xl: 30px;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 10px 24px rgba(0, 0, 0, 0.12);
+    --transition: 0.25s ease;
+}
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+    min-height: 100dvh;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    font-size: clamp(24px, 5vw, 32px);
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+}
+
+
+/* =========================================
+   CARD
+========================================= */
+.card {
+    background: var(--card);
+    width: 100%;
+    max-width: 460px;
+    border-radius: var(--radius);
+    padding: clamp(16px, 4vw, 24px);
+    box-shadow: var(--shadow);
+    align-self: flex-start;
+}
+
+h1, h2 {
+    text-align: center;
+    margin: 0.2rem;
+}
+
+/* =========================================
+   PERSEN BOX
+========================================= */
+.persen-box {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    align-items: stretch;
+    margin-bottom: 16px;
+}
+
+.persen-item {
+    flex: 1;
+    text-align: center;
+    background: #f8faf8;
+    border-radius: var(--radius-sm);
+    padding: 12px 8px;
+}
+
+.judul {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.percent {
+    text-align: center;
+    font-size: clamp(32px, 8vw, 48px);
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+/* =========================================
+   PROGRESS BAR
+========================================= */
+.progress {
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 12px 0 16px;
+}
+
+.bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 20px;
+    transition: width 0.5s ease, background var(--transition);
+}
+
+/* =========================================
+   ROW
+========================================= */
+.row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 4px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+}
+
+.row:last-of-type {
+    border-bottom: none;
+}
+
+.row span {
+    color: var(--text-light);
+}
+
+.row b {
+    color: var(--text);
+    font-weight: 700;
+}
+
+/* =========================================
+   BUTTON
+========================================= */
+button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 14px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--primary);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: inherit;
+}
+
+button:hover {
+    background: var(--primary-hover);
+    box-shadow: var(--shadow-hover);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+/* =========================================
+   UPDATE & STATUS
+========================================= */
+.update, #status {
+    text-align: center;
+    color: var(--text-light);
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+/* =========================================
+   PETUGAS LIST
+========================================= */
+h3 {
+    margin-top: 24px;
+    margin-bottom: 14px;
+    color: var(--primary);
+    font-size: clamp(16px, 3vw, 18px);
+}
+
+.petugas-card {
+    background: var(--card);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    margin-top: 10px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+}
+
+.nama {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text);
+}
+
+.petugas-progress {
+    height: 10px;
+    background: #e0e0e0;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.petugas-bar {
+    height: 100%;
+    border-radius: 20px;
+    transition: width 0.5s ease;
+}
+
+.angka {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    .card {
+        padding: 14px;
+    }
+    .persen-box {
+        gap: 8px;
+    }
+    .petugas-card {
+        padding: 10px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

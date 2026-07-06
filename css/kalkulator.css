@@ -1,0 +1,396 @@
+/* =========================================
+   KALKULATOR CSS - Tema Landing Page
+========================================= */
+:root {
+    --primary: #006e16;
+    --primary-hover: #00881c;
+    --primary-alpha: rgba(0, 110, 22, 0.12);
+    --bg: #f5f7f6;
+    --card: #ffffff;
+    --text: #222;
+    --text-light: #666;
+    --border: #e2e8e4;
+    --radius: 18px;
+    --radius-sm: 10px;
+    --radius-md: 12px;
+    --radius-xl: 30px;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 10px 24px rgba(0, 0, 0, 0.12);
+    --transition: 0.25s ease;
+    --spacing-xs: 6px;
+    --spacing-sm: 12px;
+    --spacing-md: 20px;
+    --spacing-lg: 25px;
+}
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: var(--spacing-md);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+.container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.logo {
+    font-size: clamp(50px, 10vw, 70px);
+    line-height: 1;
+}
+
+.judul {
+    text-align: center;
+}
+
+.judul h1 {
+    font-size: clamp(20px, 5vw, 28px);
+    font-weight: 700;
+}
+
+.judul h2 {
+    font-size: clamp(22px, 6vw, 32px);
+    color: var(--primary);
+    margin-top: 5px;
+    font-weight: 800;
+}
+
+.judul h3 {
+    color: var(--text-light);
+    font-size: clamp(14px, 2.5vw, 16px);
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+/* =========================================
+   INPUT BOX
+========================================= */
+.input-box {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow);
+    margin-bottom: var(--spacing-lg);
+}
+
+.section-title {
+    text-align: center;
+    font-size: clamp(18px, 3vw, 20px);
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: var(--spacing-md);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: var(--spacing-sm);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-light);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select {
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 15px;
+    font-size: 16px;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    outline: none;
+    background: var(--card);
+    width: 100%;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-alpha);
+}
+
+.form-group input[readonly] {
+    background: #f5f5f5;
+    color: var(--text-light);
+    cursor: not-allowed;
+}
+
+/* =========================================
+   TAB MENU
+========================================= */
+.tab-menu {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.tab {
+    border: 2px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    padding: 12px 24px;
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    font-size: clamp(14px, 2.5vw, 15px);
+    font-weight: 700;
+    transition: all var(--transition);
+}
+
+.tab:hover {
+    border-color: var(--primary);
+    background: var(--primary-alpha);
+}
+
+.tab.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    box-shadow: var(--shadow);
+}
+
+/* =========================================
+   TAB CONTENT
+========================================= */
+.tab-content {
+    display: none;
+}
+
+.tab-content.aktif {
+    display: block;
+    animation: fadeSlideUp 0.3s ease forwards;
+}
+
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   CARD
+========================================= */
+.card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: clamp(15px, 4vw, 24px);
+    box-shadow: var(--shadow);
+    margin-bottom: var(--spacing-lg);
+}
+
+.card-title {
+    text-align: center;
+    color: var(--primary);
+    margin-bottom: 24px;
+    font-size: clamp(18px, 3vw, 20px);
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 10px;
+}
+
+/* =========================================
+   KATEGORI
+========================================= */
+.kategori {
+    margin-bottom: 28px;
+}
+
+.kategori:last-child {
+    margin-bottom: 0;
+}
+
+.kategori-title {
+    font-size: clamp(13px, 2.2vw, 14px);
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--border);
+}
+
+/* =========================================
+   LIST ITEM
+========================================= */
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 4px;
+    font-size: 14px;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.list-item .label {
+    color: var(--text-light);
+    font-weight: 500;
+    flex: 1;
+}
+
+.list-item .value {
+    color: var(--text);
+    font-weight: 700;
+    text-align: right;
+    font-size: 15px;
+}
+
+/* =========================================
+   HIGHLIGHT STATIC
+========================================= */
+.highlight-static {
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-top: 6px;
+}
+
+/* =========================================
+   BTN-COPY-ROW
+========================================= */
+.btn-copy-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #e8f5e9;
+    border: 2px solid #a5d6a7;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-top: 6px;
+    cursor: pointer;
+    transition: all var(--transition);
+    box-shadow: var(--shadow);
+}
+
+.btn-copy-row:hover {
+    background: #c8e6c9;
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.btn-copy-row:active {
+    transform: scale(0.98);
+}
+
+.btn-copy-row .btn-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+.btn-copy-row .btn-value {
+    font-weight: 800;
+    font-size: clamp(16px, 3vw, 18px);
+    color: var(--text);
+}
+
+/* =========================================
+   TOTAL PENGELUARAN
+========================================= */
+.total-pengeluaran .kategori-title {
+    font-weight: 800;
+    color: var(--text);
+}
+
+/* =========================================
+   BUTTON UMUM
+========================================= */
+button {
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+@media (max-width: 768px) {
+    body { padding: 15px; }
+    .header { flex-direction: column; gap: 15px; }
+    .grid { grid-template-columns: 1fr; }
+    .tab { flex: 1; min-width: 0; padding: 10px 15px; font-size: 14px; text-align: center; }
+}
+
+@media (max-width: 480px) {
+    .list-item,
+    .btn-copy-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    .list-item .value,
+    .btn-copy-row .btn-value {
+        text-align: left;
+        font-size: 18px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* =========================================
+   SPECIAL: WARUNG SEMBAKO
+========================================= */
+.judul h1 { margin-bottom: 0; }
+.judul h2 { margin-top: 0; }
+.judul h3 { margin-top: 2px; }
+
+.row-inline {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+.row-inline .form-group {
+    flex: 1;
+    min-width: 0;
+}
+.row-inline .form-group.auto {
+    flex: 0 0 auto;
+}
+
+.input-disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+.input-disabled input {
+    background: #f5f5f5;
+    cursor: not-allowed;
+}
