@@ -177,7 +177,7 @@ exports.handler = async (event) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+                'Authorization': `Bearer ${process.env.PROFESI_GRK}`
             },
             body: JSON.stringify({
                 model: 'llama-3.3-70b-versatile',
