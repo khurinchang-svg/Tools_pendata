@@ -59,9 +59,7 @@
             margin-bottom: 24px;
         }
 
-        .form-group {
-            margin-bottom: 16px;
-        }
+        .form-group { margin-bottom: 16px; }
 
         label {
             display: block;
@@ -118,10 +116,7 @@
             display: none;
         }
 
-        .hasil-box.show {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
+        .hasil-box.show { display: block; animation: fadeIn 0.3s ease; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(5px); }
@@ -143,22 +138,10 @@
             color: var(--primary);
         }
 
-        .hasil-kode {
-            font-size: 13px;
-            color: var(--text-light);
-            margin-top: 2px;
-        }
+        .hasil-kode { font-size: 13px; color: var(--text-light); margin-top: 2px; }
 
-        .error-box {
-            background: #fff5f5;
-            border-color: #fcc;
-        }
-
-        .error-box .hasil-profesi {
-            color: #c62828;
-            font-size: 15px;
-            font-weight: 600;
-        }
+        .error-box { background: #fff5f5; border-color: #fcc; }
+        .error-box .hasil-profesi { color: #c62828; font-size: 15px; font-weight: 600; }
 
         .back-link {
             display: block;
@@ -168,7 +151,6 @@
             text-decoration: none;
             font-size: 13px;
         }
-
         .back-link:hover { color: var(--primary); }
 
         .petunjuk {
@@ -181,7 +163,6 @@
             color: #e65100;
             display: none;
         }
-
         .petunjuk.show { display: block; }
     </style>
 </head>
@@ -212,8 +193,6 @@
     </div>
 
     <script>
-        const API_KEY = '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';
-
         const DAFTAR_PROFESI = `000. Tidak Bekerja
 001. Agen Tenaga Kerja
 002. Ahli Sejarah dan Cagar Budaya
@@ -364,64 +343,60 @@
 999. Tidak Tahu`;
 
         async function cariProfesi() {
-    const keyword = document.getElementById('inputProfesi').value.trim();
-    const btn = document.getElementById('btnCari');
-    const hasilBox = document.getElementById('hasilBox');
-    const hasilLabel = document.getElementById('hasilLabel');
-    const hasilProfesi = document.getElementById('hasilProfesi');
-    const hasilKode = document.getElementById('hasilKode');
-    const petunjukSaran = document.getElementById('petunjukSaran');
+            const keyword = document.getElementById('inputProfesi').value.trim();
+            const btn = document.getElementById('btnCari');
+            const hasilBox = document.getElementById('hasilBox');
+            const hasilLabel = document.getElementById('hasilLabel');
+            const hasilProfesi = document.getElementById('hasilProfesi');
+            const hasilKode = document.getElementById('hasilKode');
+            const petunjukSaran = document.getElementById('petunjukSaran');
 
-    if (!keyword) return;
+            if (!keyword) return;
 
-    btn.disabled = true;
-    btn.textContent = 'Mencari...';
-    hasilBox.classList.remove('show', 'error-box');
-    petunjukSaran.classList.remove('show');
+            btn.disabled = true;
+            btn.textContent = 'Mencari...';
+            hasilBox.classList.remove('show', 'error-box');
+            petunjukSaran.classList.remove('show');
 
-    try {
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`
-    },
-    body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [{
-            role: 'user',
-            content: `You are a job classification assistant. Here is the COMPLETE list of available job codes:\n${DAFTAR_PROFESI}\n\nUser typed: "${keyword}"\n\nIMPORTANT RULES:\n1. Choose ONE best match from the list above.\n2. DO NOT invent or make up any job that is NOT in the list.\n3. If no match, return exactly: "185 - Lainnya (tuliskan: ....................................)" followed by "(saran: your suggestion)".\n4. Reply ONLY with this format: "CODE - JOB NAME"\n5. No extra words, no explanation.`
-        }]
-    })
-});
+            try {
+                const response = await fetch('/.netlify/functions/cari-profesi', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keyword: keyword })
+                });
 
-const data = await response.json();
-const jawaban = data.choices[0].message.content.trim();
+                const data = await response.json();
+                const jawaban = data.choices[0].message.content.trim();
 
-        if (jawaban.includes('185') && jawaban.includes('saran:')) {
-            const parts = jawaban.split('(saran:');
-            hasilProfesi.textContent = parts[0].trim();
-            hasilKode.textContent = '';
-            petunjukSaran.textContent = 'Saran: ' + parts[1].replace(')', '').trim();
-            petunjukSaran.classList.add('show');
-        } else {
-            hasilProfesi.textContent = jawaban;
-            hasilKode.textContent = 'Pencocokan AI';
+                if (jawaban.includes('185') && jawaban.includes('saran:')) {
+                    const parts = jawaban.split('(saran:');
+                    hasilProfesi.textContent = parts[0].trim();
+                    hasilKode.textContent = '';
+                    petunjukSaran.textContent = 'Saran: ' + parts[1].replace(')', '').trim();
+                    petunjukSaran.classList.add('show');
+                } else {
+                    hasilProfesi.textContent = jawaban;
+                    hasilKode.textContent = 'Pencocokan AI';
+                }
+
+                hasilLabel.textContent = 'Hasil Pencarian';
+                hasilBox.classList.add('show');
+
+            } catch (err) {
+                hasilLabel.textContent = 'Error';
+                hasilProfesi.textContent = 'Gagal menghubungi AI';
+                hasilKode.textContent = 'Periksa koneksi internet';
+                hasilBox.classList.add('error-box', 'show');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Cari Profesi';
+            }
         }
 
-        hasilLabel.textContent = 'Hasil Pencarian';
-        hasilBox.classList.add('show');
-
-    } catch (err) {
-        hasilLabel.textContent = 'Error';
-        hasilProfesi.textContent = 'Gagal menghubungi AI';
-        hasilKode.textContent = 'Periksa koneksi internet';
-        hasilBox.classList.add('error-box', 'show');
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Cari Profesi';
-    }
-};
+        // Enter key
+        document.getElementById('inputProfesi').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') cariProfesi();
+        });
     </script>
 </body>
 </html>
