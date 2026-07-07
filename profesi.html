@@ -132,10 +132,12 @@
         .input-group {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .input-group input {
             flex: 1;
+            min-width: 150px;
         }
 
         .btn-cari {
@@ -163,6 +165,36 @@
         .btn-cari:disabled {
             background: #aaa;
             cursor: not-allowed;
+        }
+
+        .btn-ai {
+            background: #7b1fa2;
+            padding: 10px 16px;
+            font-size: 12px;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .btn-ai:hover:not(:disabled) {
+            background: #6a1b8a;
+        }
+
+        .btn-ai:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-group .hint {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 400;
         }
 
         .token-status {
@@ -333,6 +365,22 @@
             border-radius: 10px;
             font-weight: 600;
             text-transform: uppercase;
+        }
+
+        .hasil-item .badge-mini {
+            font-size: 10px;
+            background: #ff9800;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .hasil-item .score {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-left: 4px;
         }
 
         .hasil-item .detail {
@@ -516,6 +564,13 @@
             .hasil-item .header {
                 flex-wrap: wrap;
             }
+            .btn-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .btn-group .hint {
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -548,6 +603,10 @@
                     <input type="text" id="searchInput" placeholder="Contoh: dokter anak, tukang kayu, programmer..." autocomplete="off" disabled>
                     <button class="btn-cari" id="btnCari" disabled>🔍 Cari</button>
                 </div>
+                <div class="btn-group" style="margin-top:8px;">
+                    <button class="btn-cari btn-ai" id="btnKirimAI" disabled>🤖 Kirim ke AI</button>
+                    <span class="hint">💡 Kurang relevan? Coba AI</span>
+                </div>
             </div>
 
             <!-- HASIL -->
@@ -570,7 +629,7 @@
 
     <script>
         // ============================================================
-        // FINAL VERSION - profesi.html (DENGAN GROQ AI)
+        // FINAL VERSION - profesi.html (DENGAN GROQ AI + TOMBOL)
         // ============================================================
 
         const VALID_TOKENS = ['lena004', 'lina004', 'hera004', 'salman004', 'nina004', 'uher007', 'ehat007'];
@@ -580,12 +639,16 @@
         let kbliIndex = null;
         let isIndexed = false;
         let isSearching = false;
+        let lastKeyword = '';
+        let lastProfesiResults = [];
+        let lastKbliResults = [];
 
         const tokenInput = document.getElementById('tokenInput');
         const tokenStatus = document.getElementById('tokenStatus');
         const btnGantiToken = document.getElementById('btnGantiToken');
         const searchInput = document.getElementById('searchInput');
         const btnCari = document.getElementById('btnCari');
+        const btnKirimAI = document.getElementById('btnKirimAI');
         const hasilBox = document.getElementById('hasilBox');
         const hasilLabel = document.getElementById('hasilLabel');
         const hasilContent = document.getElementById('hasilContent');
@@ -651,7 +714,7 @@
         }
 
         // ============================================================
-        // TOKEN & RATE LIMIT
+        // TOKEN & RATE LIMIT (5/5 menit khusus AI)
         // ============================================================
 
         function isValidToken(token) {
@@ -659,30 +722,30 @@
         }
 
         function getRateLimit(token) {
-            const key = 'rateLimit_' + token;
+            const key = 'rateLimit_ai_' + token;
             const data = localStorage.getItem(key);
             if (data) {
                 try {
                     const parsed = JSON.parse(data);
                     if (Date.now() > parsed.resetAt) {
-                        const newData = { count: 0, resetAt: Date.now() + 10 * 60 * 1000 };
+                        const newData = { count: 0, resetAt: Date.now() + 5 * 60 * 1000 };
                         localStorage.setItem(key, JSON.stringify(newData));
                         return newData;
                     }
                     return parsed;
                 } catch (e) {
-                    const newData = { count: 0, resetAt: Date.now() + 10 * 60 * 1000 };
+                    const newData = { count: 0, resetAt: Date.now() + 5 * 60 * 1000 };
                     localStorage.setItem(key, JSON.stringify(newData));
                     return newData;
                 }
             }
-            const newData = { count: 0, resetAt: Date.now() + 10 * 60 * 1000 };
+            const newData = { count: 0, resetAt: Date.now() + 5 * 60 * 1000 };
             localStorage.setItem(key, JSON.stringify(newData));
             return newData;
         }
 
         function incrementRateLimit(token) {
-            const key = 'rateLimit_' + token;
+            const key = 'rateLimit_ai_' + token;
             const data = getRateLimit(token);
             data.count++;
             localStorage.setItem(key, JSON.stringify(data));
@@ -697,7 +760,7 @@
             return `${left}/5 ${resetText}`;
         }
 
-        function canSearch(token) {
+        function canSearchAI(token) {
             const data = getRateLimit(token);
             return (data.count || 0) < 5;
         }
@@ -714,12 +777,12 @@
                 return;
             }
             const remaining = getRemainingText(token);
-            const can = canSearch(token);
+            const can = canSearchAI(token);
             if (can) {
-                tokenStatus.textContent = `✅ Token valid • 💡 sisa ${remaining}`;
+                tokenStatus.textContent = `✅ Token valid • 💡 sisa AI: ${remaining}`;
                 tokenStatus.className = 'token-status success';
             } else {
-                tokenStatus.textContent = `⛔ Token habis • sisa ${remaining} • ganti token`;
+                tokenStatus.textContent = `⛔ Token habis • sisa AI: ${remaining} • ganti token`;
                 tokenStatus.className = 'token-status error';
             }
         }
@@ -727,11 +790,18 @@
         function enableSearch() {
             searchInput.disabled = false;
             btnCari.disabled = false;
+            const token = tokenInput.value.trim();
+            if (isValidToken(token) && canSearchAI(token)) {
+                btnKirimAI.disabled = false;
+            } else {
+                btnKirimAI.disabled = true;
+            }
         }
 
         function disableSearch() {
             searchInput.disabled = true;
             btnCari.disabled = true;
+            btnKirimAI.disabled = true;
         }
 
         // ============================================================
@@ -746,7 +816,7 @@
             return kbliData.find(k => k.kode === code);
         }
 
-        function renderSectionHeader(type, items, isMain, isAI) {
+        function renderSectionHeader(type, items, title, isMain, isAI) {
             const isProfesi = type === 'profesi';
             const icon = isProfesi ? '👤' : '📂';
             const label = isProfesi ? 'PROFESI' : 'KBLI (Usaha)';
@@ -772,7 +842,7 @@
             if (items && items.length > 0) {
                 items.forEach(item => {
                     const code = isProfesi ? item.nomor : item.kode;
-                    const title = isProfesi ? item.profesi : item.judul;
+                    const titleName = isProfesi ? item.profesi : item.judul;
                     const desc = item.uraian || '';
                     const codeClass = isProfesi ? 'kode-profesi' : 'kode-kbli';
                     const detailClass = isProfesi ? '' : 'detail-kbli';
@@ -781,7 +851,7 @@
                         <div class="hasil-item" onclick="toggleDetail(this)">
                             <div class="header">
                                 <span class="kode ${codeClass}">${code}</span>
-                                <span class="nama">${title}</span>
+                                <span class="nama">${titleName}</span>
                                 <span class="arrow">▼</span>
                             </div>
                             <div class="detail ${detailClass}">${desc || 'Tidak ada uraian'}</div>
@@ -800,37 +870,25 @@
             return html;
         }
 
-        function renderOtherResults(profesiCandidates, kbliCandidates) {
-            let html = '<div class="hasil-lainnya">';
-            html += '<div class="label">📋 Hasil lainnya (database)</div>';
+        function renderMiniResults(profesiResults, kbliResults) {
+            let html = '';
 
-            if (profesiCandidates && profesiCandidates.length > 0) {
-                html += '<div style="margin-top:4px;"><strong>👤 Profesi:</strong> ';
-                profesiCandidates.forEach((item, i) => {
-                    const data = getProfesiByCode(item.nomor);
-                    if (data) {
-                        html +=
-                            `<span class="item" onclick="showDetail('profesi','${data.nomor}')">${data.nomor} - ${data.profesi}</span>`;
-                        if (i < profesiCandidates.length - 1) html += ' | ';
-                    }
-                });
-                html += '</div>';
+            // Profesi - 5 teratas
+            const profesiItems = profesiResults.slice(0, 5).map(p => getProfesiByCode(p.nomor)).filter(Boolean);
+            if (profesiItems.length > 0) {
+                html += renderSectionHeader('profesi', profesiItems, 'Hasil Profesi', false, false);
             }
 
-            if (kbliCandidates && kbliCandidates.length > 0) {
-                html += '<div style="margin-top:4px;"><strong>📂 KBLI:</strong> ';
-                kbliCandidates.forEach((item, i) => {
-                    const data = getKbliByCode(item.kode);
-                    if (data) {
-                        html +=
-                            `<span class="item" onclick="showDetail('kbli','${data.kode}')">${data.kode} - ${data.judul}</span>`;
-                        if (i < kbliCandidates.length - 1) html += ' | ';
-                    }
-                });
-                html += '</div>';
+            // KBLI - 5 teratas
+            const kbliItems = kbliResults.slice(0, 5).map(k => getKbliByCode(k.kode)).filter(Boolean);
+            if (kbliItems.length > 0) {
+                html += renderSectionHeader('kbli', kbliItems, 'Hasil KBLI', false, false);
             }
 
-            html += '</div>';
+            if (!profesiItems.length && !kbliItems.length) {
+                html = `<div class="empty-state">😕 Tidak ada hasil dari database</div>`;
+            }
+
             return html;
         }
 
@@ -844,9 +902,10 @@
             history.slice(0, 10).forEach(item => {
                 const time = new Date(item.timestamp);
                 const timeStr = time.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                const source = item.source === 'ai' ? '🤖' : '📊';
                 html += `
                     <div class="history-item">
-                        <span class="query">${item.query}</span>
+                        <span class="query">${source} ${item.query}</span>
                         <span class="codes">${item.profesi || '000'} | ${item.kbli || '000'}</span>
                         <span class="time">${timeStr}</span>
                     </div>
@@ -855,12 +914,13 @@
             historyContent.innerHTML = html;
         }
 
-        function saveHistory(query, profesiCode, kbliCode) {
+        function saveHistory(query, profesiCode, kbliCode, source) {
             const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
             history.unshift({
                 query: query,
                 profesi: profesiCode || '000',
                 kbli: kbliCode || '000',
+                source: source || 'mini',
                 timestamp: Date.now()
             });
             if (history.length > 50) history.pop();
@@ -874,11 +934,11 @@
 
         async function callGroq(keyword, profesiCandidates, kbliCandidates) {
             try {
-                const profesiText = profesiCandidates.map(p =>
+                const profesiText = profesiCandidates.slice(0, 5).map(p =>
                     `${p.nomor}. ${p.profesi} - ${p.uraian || ''}`
                 ).join('\n');
 
-                const kbliText = kbliCandidates.map(k =>
+                const kbliText = kbliCandidates.slice(0, 5).map(k =>
                     `${k.kode}. ${k.judul}`
                 ).join('\n');
 
@@ -887,8 +947,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         keyword: keyword,
-                        profesiCandidates: profesiText,
-                        kbliCandidates: kbliText
+                        profesiCandidates: profesiText || 'Tidak ada kandidat',
+                        kbliCandidates: kbliText || 'Tidak ada kandidat'
                     })
                 });
 
@@ -915,10 +975,10 @@
         }
 
         // ============================================================
-        // MAIN SEARCH
+        // MAIN SEARCH (MiniSearch Only)
         // ============================================================
 
-        async function doSearch() {
+        async function doMiniSearch() {
             const keyword = searchInput.value.trim();
             if (!keyword) return;
             if (!isIndexed) {
@@ -933,11 +993,7 @@
                 tokenStatus.className = 'token-status error';
                 return;
             }
-            if (!canSearch(token)) {
-                tokenStatus.textContent = '⛔ Token habis, silakan ganti token';
-                tokenStatus.className = 'token-status error';
-                return;
-            }
+
             if (isSearching) return;
 
             isSearching = true;
@@ -950,105 +1006,43 @@
             infoAi.textContent = '';
 
             try {
-                // STEP 1: MiniSearch
                 const profesiResults = profesiIndex.search(keyword, { limit: 5 });
                 const kbliResults = kbliIndex.search(keyword, { limit: 5 });
 
-                let selectedProfesi = null;
-                let selectedKbli = null;
-                let usedAI = false;
+                lastKeyword = keyword;
+                lastProfesiResults = profesiResults;
+                lastKbliResults = kbliResults;
 
-                // STEP 2: Cek apakah perlu AI
-                const needAI = profesiResults.length === 0 ||
-                    profesiResults[0]?.score < 0.8 ||
-                    kbliResults.length === 0 ||
-                    kbliResults[0]?.score < 0.8;
+                // Tampilkan 5 teratas
+                let html = renderMiniResults(profesiResults, kbliResults);
 
-                if (needAI && (profesiResults.length > 0 || kbliResults.length > 0)) {
-                    // STEP 3: Kirim ke Groq
-                    hasilContent.innerHTML = '<div class="loading-text">⏳ AI sedang memilih yang terbaik...</div>';
-                    hasilLabel.textContent = '⏳ Menghubungi AI...';
-
-                    const groqResult = await callGroq(keyword, profesiResults, kbliResults);
-
-                    if (groqResult && groqResult.profesi) {
-                        selectedProfesi = getProfesiByCode(groqResult.profesi);
-                        usedAI = true;
-                    }
-                    if (groqResult && groqResult.kbli) {
-                        selectedKbli = getKbliByCode(groqResult.kbli);
-                        usedAI = true;
-                    }
-                }
-
-                // STEP 4: Fallback ke MiniSearch
-                if (!selectedProfesi && profesiResults.length > 0) {
-                    selectedProfesi = getProfesiByCode(profesiResults[0].nomor);
-                }
-                if (!selectedKbli && kbliResults.length > 0) {
-                    selectedKbli = getKbliByCode(kbliResults[0].kode);
-                }
-
-                // STEP 5: Jika tidak ada hasil sama sekali
-                if (!selectedProfesi && !selectedKbli) {
-                    hasilContent.innerHTML = `
+                // Jika hasil kosong
+                if (profesiResults.length === 0 && kbliResults.length === 0) {
+                    html = `
                         <div class="empty-state">
                             😕 Tidak ada hasil untuk "<strong>${keyword}</strong>"<br>
-                            <span style="font-size:13px;color:var(--text-light);">Coba kata kunci lain</span>
+                            <span style="font-size:13px;color:var(--text-light);">Coba kata kunci lain atau gunakan AI</span>
                         </div>
                     `;
                     hasilLabel.textContent = 'Tidak ditemukan';
                     hasilBox.classList.add('error');
-                    return;
+                } else {
+                    hasilLabel.textContent = '📊 Hasil Database (MiniSearch)';
+                    hasilBox.classList.remove('error');
+                    // Aktifkan tombol AI
+                    const token2 = tokenInput.value.trim();
+                    if (isValidToken(token2) && canSearchAI(token2)) {
+                        btnKirimAI.disabled = false;
+                    }
                 }
-
-                // STEP 6: Tampilkan hasil
-                let html = '';
-
-                // === SECTION PROFESI ===
-                let profesiItems = selectedProfesi ? [selectedProfesi] : [];
-                html += renderSectionHeader('profesi', profesiItems, true, usedAI);
-
-                // === SECTION KBLI ===
-                let kbliItems = selectedKbli ? [selectedKbli] : [];
-                html += renderSectionHeader('kbli', kbliItems, true, usedAI);
-
-                // === HASIL LAINNYA ===
-                const otherProfesi = profesiResults
-                    .filter(p => p.nomor !== selectedProfesi?.nomor)
-                    .slice(0, 3)
-                    .map(p => getProfesiByCode(p.nomor))
-                    .filter(Boolean);
-
-                const otherKbli = kbliResults
-                    .filter(k => k.kode !== selectedKbli?.kode)
-                    .slice(0, 3)
-                    .map(k => getKbliByCode(k.kode))
-                    .filter(Boolean);
-
-                if (otherProfesi.length > 0 || otherKbli.length > 0) {
-                    html += renderOtherResults(otherProfesi, otherKbli);
-                }
-
-                // === INFO SUMBER ===
-                const sourceText = usedAI ?
-                    '🤖 AI memilih dari kandidat database' :
-                    '⚡ Pencocokan langsung dari database (skor tinggi)';
-                infoAi.textContent = sourceText;
 
                 hasilContent.innerHTML = html;
-                hasilLabel.textContent = '✅ Hasil Pencarian';
-                hasilBox.classList.remove('error');
+                infoAi.textContent = '📌 MiniSearch - 5 hasil teratas dari database';
 
-                // Update rate limit & history
-                incrementRateLimit(token);
-                updateTokenStatus(token);
-
-                saveHistory(
-                    keyword,
-                    selectedProfesi?.nomor || '000',
-                    selectedKbli?.kode || '000'
-                );
+                // Simpan history (mini)
+                const topProfesi = profesiResults.length > 0 ? profesiResults[0].nomor : '000';
+                const topKbli = kbliResults.length > 0 ? kbliResults[0].kode : '000';
+                saveHistory(keyword, topProfesi, topKbli, 'mini');
 
             } catch (err) {
                 console.error('Search error:', err);
@@ -1061,6 +1055,172 @@
                 isSearching = false;
                 btnCari.disabled = false;
                 btnCari.textContent = '🔍 Cari';
+            }
+        }
+
+        // ============================================================
+        // AI SEARCH (Panggil Groq)
+        // ============================================================
+
+        async function doAISearch() {
+            const keyword = lastKeyword || searchInput.value.trim();
+            if (!keyword) {
+                alert('Cari dulu dengan tombol "🔍 Cari"');
+                return;
+            }
+            if (!isIndexed) {
+                tokenStatus.textContent = '⏳ Data sedang dimuat...';
+                tokenStatus.className = 'token-status info';
+                return;
+            }
+
+            const token = tokenInput.value.trim();
+            if (!isValidToken(token)) {
+                tokenStatus.textContent = '⚠️ Token tidak valid';
+                tokenStatus.className = 'token-status error';
+                return;
+            }
+            if (!canSearchAI(token)) {
+                tokenStatus.textContent = `⛔ Token habis • sisa AI: ${getRemainingText(token)} • ganti token`;
+                tokenStatus.className = 'token-status error';
+                return;
+            }
+
+            if (isSearching) return;
+
+            isSearching = true;
+            btnKirimAI.disabled = true;
+            btnKirimAI.innerHTML = '<span class="spinner"></span> AI...';
+            hasilBox.classList.remove('show', 'error');
+            hasilContent.innerHTML = '<div class="loading-text">⏳ AI sedang memilih yang terbaik...</div>';
+            hasilBox.classList.add('show');
+            hasilLabel.textContent = '⏳ Menghubungi AI...';
+            infoAi.textContent = '';
+
+            try {
+                // Gunakan hasil MiniSearch terakhir, atau cari ulang
+                let profesiResults = lastProfesiResults;
+                let kbliResults = lastKbliResults;
+
+                if (!profesiResults || profesiResults.length === 0) {
+                    profesiResults = profesiIndex.search(keyword, { limit: 5 });
+                }
+                if (!kbliResults || kbliResults.length === 0) {
+                    kbliResults = kbliIndex.search(keyword, { limit: 5 });
+                }
+
+                // Kirim ke Groq
+                const groqResult = await callGroq(keyword, profesiResults, kbliResults);
+
+                let selectedProfesi = null;
+                let selectedKbli = null;
+
+                if (groqResult && groqResult.profesi) {
+                    selectedProfesi = getProfesiByCode(groqResult.profesi);
+                }
+                if (groqResult && groqResult.kbli) {
+                    selectedKbli = getKbliByCode(groqResult.kbli);
+                }
+
+                // Fallback: jika Groq gagal, pakai hasil MiniSearch teratas
+                if (!selectedProfesi && profesiResults.length > 0) {
+                    selectedProfesi = getProfesiByCode(profesiResults[0].nomor);
+                }
+                if (!selectedKbli && kbliResults.length > 0) {
+                    selectedKbli = getKbliByCode(kbliResults[0].kode);
+                }
+
+                // Tampilkan hasil AI
+                let html = '';
+
+                // Hasil AI (jika ada)
+                if (selectedProfesi) {
+                    html += renderSectionHeader('profesi', [selectedProfesi], 'Hasil AI', true, true);
+                }
+                if (selectedKbli) {
+                    html += renderSectionHeader('kbli', [selectedKbli], 'Hasil AI', true, true);
+                }
+
+                // Hasil MiniSearch lainnya (5 teratas)
+                const otherProfesi = profesiResults
+                    .filter(p => p.nomor !== selectedProfesi?.nomor)
+                    .slice(0, 5)
+                    .map(p => getProfesiByCode(p.nomor))
+                    .filter(Boolean);
+
+                const otherKbli = kbliResults
+                    .filter(k => k.kode !== selectedKbli?.kode)
+                    .slice(0, 5)
+                    .map(k => getKbliByCode(k.kode))
+                    .filter(Boolean);
+
+                if (otherProfesi.length > 0 || otherKbli.length > 0) {
+                    html += `<div style="margin-top:16px;border-top:2px dashed var(--border);padding-top:16px;">`;
+                    html += `<div style="font-size:12px;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:8px;">📋 Hasil Database (MiniSearch)</div>`;
+                    if (otherProfesi.length > 0) {
+                        html += renderSectionHeader('profesi', otherProfesi, 'Lainnya', false, false);
+                    }
+                    if (otherKbli.length > 0) {
+                        html += renderSectionHeader('kbli', otherKbli, 'Lainnya', false, false);
+                    }
+                    html += `</div>`;
+                }
+
+                if (!selectedProfesi && !selectedKbli && otherProfesi.length === 0 && otherKbli.length === 0) {
+                    html = `
+                        <div class="empty-state">
+                            😕 Tidak ada hasil untuk "<strong>${keyword}</strong>"<br>
+                            <span style="font-size:13px;color:var(--text-light);">Coba kata kunci lain</span>
+                        </div>
+                    `;
+                    hasilLabel.textContent = 'Tidak ditemukan';
+                    hasilBox.classList.add('error');
+                } else {
+                    hasilLabel.textContent = '🤖 Hasil AI';
+                    hasilBox.classList.remove('error');
+                }
+
+                hasilContent.innerHTML = html;
+                infoAi.textContent = '🤖 AI memilih dari kandidat database';
+
+                // Update rate limit
+                incrementRateLimit(token);
+                updateTokenStatus(token);
+
+                // Update history dengan AI
+                saveHistory(
+                    keyword,
+                    selectedProfesi?.nomor || '000',
+                    selectedKbli?.kode || '000',
+                    'ai'
+                );
+
+                // Cek sisa AI
+                const token2 = tokenInput.value.trim();
+                if (isValidToken(token2) && canSearchAI(token2)) {
+                    btnKirimAI.disabled = false;
+                } else {
+                    btnKirimAI.disabled = true;
+                }
+
+            } catch (err) {
+                console.error('AI Search error:', err);
+                hasilContent.innerHTML = `
+                    <div class="empty-state">⚠️ Error AI: ${err.message}</div>
+                `;
+                hasilLabel.textContent = '⚠️ Error';
+                hasilBox.classList.add('error');
+            } finally {
+                isSearching = false;
+                btnKirimAI.disabled = false;
+                btnKirimAI.textContent = '🤖 Kirim ke AI';
+                // Cek ulang status AI
+                const token2 = tokenInput.value.trim();
+                if (isValidToken(token2) && canSearchAI(token2)) {
+                    btnKirimAI.disabled = false;
+                } else {
+                    btnKirimAI.disabled = true;
+                }
             }
         }
 
@@ -1078,21 +1238,6 @@
             }
         };
 
-        window.showDetail = function(type, code) {
-            document.querySelectorAll('.hasil-item').forEach(item => {
-                const kodeEl = item.querySelector('.kode');
-                if (kodeEl && kodeEl.textContent.trim() === code) {
-                    const detail = item.querySelector('.detail');
-                    const arrow = item.querySelector('.arrow');
-                    if (detail && !detail.classList.contains('show')) {
-                        detail.classList.add('show');
-                        if (arrow) arrow.textContent = '▲';
-                    }
-                    item.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            });
-        };
-
         // ============================================================
         // EVENT LISTENERS
         // ============================================================
@@ -1106,14 +1251,19 @@
                 return;
             }
             if (isValidToken(token)) {
-                const can = canSearch(token);
-                if (can) enableSearch();
-                else disableSearch();
+                const can = canSearchAI(token);
+                if (can) {
+                    enableSearch();
+                } else {
+                    disableSearch();
+                    btnKirimAI.disabled = true;
+                }
                 updateTokenStatus(token);
             } else {
                 tokenStatus.textContent = '⚠️ Periksa kembali token anda';
                 tokenStatus.className = 'token-status error';
                 disableSearch();
+                btnKirimAI.disabled = true;
             }
         });
 
@@ -1123,13 +1273,19 @@
             tokenStatus.textContent = '';
             tokenStatus.className = 'token-status';
             disableSearch();
+            btnKirimAI.disabled = true;
+            lastKeyword = '';
+            lastProfesiResults = [];
+            lastKbliResults = [];
         });
 
-        btnCari.addEventListener('click', doSearch);
+        btnCari.addEventListener('click', doMiniSearch);
+        btnKirimAI.addEventListener('click', doAISearch);
+
         searchInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                doSearch();
+                doMiniSearch();
             }
         });
 
@@ -1141,6 +1297,7 @@
             const loaded = await loadData();
             if (loaded) {
                 disableSearch();
+                btnKirimAI.disabled = true;
                 renderHistory();
                 tokenInput.focus();
                 console.log('✅ profesi.html siap dengan AI!');
