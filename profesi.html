@@ -70,6 +70,18 @@
             margin-bottom: 24px;
         }
 
+        .badge-ai {
+            font-size: 10px;
+            background: #7b1fa2;
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-left: 8px;
+        }
+
         .divider {
             border: none;
             border-top: 2px solid var(--border);
@@ -207,7 +219,6 @@
             font-weight: 600;
         }
 
-        /* ===== SECTION PISAH PROFESI & KBLI ===== */
         .hasil-section {
             margin-bottom: 16px;
             border-radius: 10px;
@@ -253,14 +264,10 @@
             border-bottom: 2px solid var(--secondary);
         }
 
-        .header-kosong {
-            background: #f5f5f5;
-            color: var(--text-light);
-            border-bottom: 2px solid #ddd;
-        }
-
-        .header-kosong .icon {
-            opacity: 0.5;
+        .header-ai {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            border-bottom: 2px solid #7b1fa2;
         }
 
         .hasil-item {
@@ -308,9 +315,19 @@
             color: var(--text-light);
         }
 
-        .hasil-item .badge-ai {
+        .hasil-item .badge-pilihan {
             font-size: 10px;
             background: var(--primary);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .hasil-item .badge-ai-label {
+            font-size: 10px;
+            background: #7b1fa2;
             color: #fff;
             padding: 2px 8px;
             border-radius: 10px;
@@ -339,7 +356,7 @@
         }
 
         .hasil-lainnya {
-            margin-top: 12px;
+            margin-top: 16px;
             padding: 12px 16px;
             background: #f5f5f5;
             border-radius: 10px;
@@ -480,6 +497,11 @@
             }
         }
 
+        .spinner-dark {
+            border: 2px solid var(--text-light);
+            border-top-color: transparent;
+        }
+
         @media (max-width: 480px) {
             .input-group {
                 flex-direction: column;
@@ -502,7 +524,10 @@
     <div class="container">
         <div class="card">
             <h1>🔍 Cari Kode Profesi & KBLI</h1>
-            <p class="subtitle">Masukkan token, lalu cari pekerjaan atau usaha</p>
+            <p class="subtitle">
+                Masukkan token, lalu cari pekerjaan atau usaha
+                <span class="badge-ai">🤖 AI</span>
+            </p>
 
             <!-- TOKEN -->
             <div class="section-title">🔑 Token</div>
@@ -545,7 +570,7 @@
 
     <script>
         // ============================================================
-        // FINAL VERSION - profesi.html
+        // FINAL VERSION - profesi.html (DENGAN GROQ AI)
         // ============================================================
 
         const VALID_TOKENS = ['lena004', 'lina004', 'hera004', 'salman004', 'nina004', 'uher007', 'ehat007'];
@@ -586,7 +611,6 @@
                 profesiData = await profesiRes.json();
                 const kbliFull = await kbliRes.json();
 
-                // Potong uraian KBLI untuk ringan
                 kbliData = kbliFull.map(item => ({
                     kode: item.kode,
                     judul: item.judul,
@@ -596,7 +620,6 @@
                 tokenStatus.textContent = '⏳ Indexing data...';
                 tokenStatus.className = 'token-status info';
 
-                // Index Profesi
                 profesiIndex = new MiniSearch({
                     idField: 'nomor',
                     fields: ['profesi', 'uraian'],
@@ -605,7 +628,6 @@
                 });
                 profesiIndex.addAll(profesiData);
 
-                // Index KBLI
                 kbliIndex = new MiniSearch({
                     idField: 'kode',
                     fields: ['judul', 'uraian'],
@@ -724,19 +746,25 @@
             return kbliData.find(k => k.kode === code);
         }
 
-        function renderSectionHeader(type, items, isMain) {
+        function renderSectionHeader(type, items, isMain, isAI) {
             const isProfesi = type === 'profesi';
             const icon = isProfesi ? '👤' : '📂';
             const label = isProfesi ? 'PROFESI' : 'KBLI (Usaha)';
             const count = items ? items.length : 0;
-            const headerClass = isProfesi ? 'header-profesi' : 'header-kbli';
+
+            let headerClass = isProfesi ? 'header-profesi' : 'header-kbli';
+            if (isAI) headerClass = 'header-ai';
+
+            let badge = '';
+            if (isMain) badge = '⭐ Pilihan';
+            if (isAI) badge = '🤖 AI Pilih';
 
             let html = `<div class="hasil-section">`;
             html += `<div class="hasil-section-header ${headerClass}">`;
             html += `<span class="icon">${icon}</span>`;
             html += `${label}`;
-            if (isMain) {
-                html += ` <span style="font-size:10px;background:${isProfesi ? 'var(--primary)' : 'var(--secondary)'};color:#fff;padding:1px 8px;border-radius:8px;">⭐ Pilihan</span>`;
+            if (badge) {
+                html += ` <span style="font-size:10px;background:#7b1fa2;color:#fff;padding:1px 8px;border-radius:8px;">${badge}</span>`;
             }
             html += `<span class="count">${count} hasil</span>`;
             html += `</div>`;
@@ -773,7 +801,7 @@
         }
 
         function renderOtherResults(profesiCandidates, kbliCandidates) {
-            let html = '<div class="hasil-lainnya" style="margin-top:16px;">';
+            let html = '<div class="hasil-lainnya">';
             html += '<div class="label">📋 Hasil lainnya (database)</div>';
 
             if (profesiCandidates && profesiCandidates.length > 0) {
@@ -841,6 +869,52 @@
         }
 
         // ============================================================
+        // CALL GROQ API
+        // ============================================================
+
+        async function callGroq(keyword, profesiCandidates, kbliCandidates) {
+            try {
+                const profesiText = profesiCandidates.map(p =>
+                    `${p.nomor}. ${p.profesi} - ${p.uraian || ''}`
+                ).join('\n');
+
+                const kbliText = kbliCandidates.map(k =>
+                    `${k.kode}. ${k.judul}`
+                ).join('\n');
+
+                const response = await fetch('/.netlify/functions/cari', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        keyword: keyword,
+                        profesiCandidates: profesiText,
+                        kbliCandidates: kbliText
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('API error: ' + response.status);
+                }
+
+                const data = await response.json();
+                const result = data.result || '';
+
+                const parts = result.split('|');
+                const profesiCode = parts[0]?.trim() || '000';
+                const kbliCode = parts[1]?.trim() || '000';
+
+                return {
+                    profesi: profesiCode,
+                    kbli: kbliCode
+                };
+
+            } catch (err) {
+                console.error('Groq error:', err);
+                return null;
+            }
+        }
+
+        // ============================================================
         // MAIN SEARCH
         // ============================================================
 
@@ -870,20 +944,76 @@
             btnCari.disabled = true;
             btnCari.innerHTML = '<span class="spinner"></span> Mencari...';
             hasilBox.classList.remove('show', 'error');
-            hasilContent.innerHTML = '<div class="loading-text">🔍 Mencari...</div>';
+            hasilContent.innerHTML = '<div class="loading-text">🔍 Mencari di database...</div>';
             hasilBox.classList.add('show');
             hasilLabel.textContent = '🔍 Mencari...';
             infoAi.textContent = '';
 
             try {
+                // STEP 1: MiniSearch
                 const profesiResults = profesiIndex.search(keyword, { limit: 5 });
                 const kbliResults = kbliIndex.search(keyword, { limit: 5 });
 
-                // Pilih yang terbaik
-                const selectedProfesi = profesiResults.length > 0 ? getProfesiByCode(profesiResults[0].nomor) : null;
-                const selectedKbli = kbliResults.length > 0 ? getKbliByCode(kbliResults[0].kode) : null;
+                let selectedProfesi = null;
+                let selectedKbli = null;
+                let usedAI = false;
 
-                // Hasil lainnya (tanpa yang sudah dipilih)
+                // STEP 2: Cek apakah perlu AI
+                const needAI = profesiResults.length === 0 ||
+                    profesiResults[0]?.score < 0.8 ||
+                    kbliResults.length === 0 ||
+                    kbliResults[0]?.score < 0.8;
+
+                if (needAI && (profesiResults.length > 0 || kbliResults.length > 0)) {
+                    // STEP 3: Kirim ke Groq
+                    hasilContent.innerHTML = '<div class="loading-text">⏳ AI sedang memilih yang terbaik...</div>';
+                    hasilLabel.textContent = '⏳ Menghubungi AI...';
+
+                    const groqResult = await callGroq(keyword, profesiResults, kbliResults);
+
+                    if (groqResult && groqResult.profesi) {
+                        selectedProfesi = getProfesiByCode(groqResult.profesi);
+                        usedAI = true;
+                    }
+                    if (groqResult && groqResult.kbli) {
+                        selectedKbli = getKbliByCode(groqResult.kbli);
+                        usedAI = true;
+                    }
+                }
+
+                // STEP 4: Fallback ke MiniSearch
+                if (!selectedProfesi && profesiResults.length > 0) {
+                    selectedProfesi = getProfesiByCode(profesiResults[0].nomor);
+                }
+                if (!selectedKbli && kbliResults.length > 0) {
+                    selectedKbli = getKbliByCode(kbliResults[0].kode);
+                }
+
+                // STEP 5: Jika tidak ada hasil sama sekali
+                if (!selectedProfesi && !selectedKbli) {
+                    hasilContent.innerHTML = `
+                        <div class="empty-state">
+                            😕 Tidak ada hasil untuk "<strong>${keyword}</strong>"<br>
+                            <span style="font-size:13px;color:var(--text-light);">Coba kata kunci lain</span>
+                        </div>
+                    `;
+                    hasilLabel.textContent = 'Tidak ditemukan';
+                    hasilBox.classList.add('error');
+                    return;
+                }
+
+                // STEP 6: Tampilkan hasil
+                let html = '';
+
+                // === SECTION PROFESI ===
+                let profesiItems = selectedProfesi ? [selectedProfesi] : [];
+                html += renderSectionHeader('profesi', profesiItems, true, usedAI);
+
+                // === SECTION KBLI ===
+                let kbliItems = selectedKbli ? [selectedKbli] : [];
+                html += renderSectionHeader('kbli', kbliItems, true, usedAI);
+
+                // === HASIL LAINNYA ===
                 const otherProfesi = profesiResults
                     .filter(p => p.nomor !== selectedProfesi?.nomor)
                     .slice(0, 3)
@@ -896,46 +1026,14 @@
                     .map(k => getKbliByCode(k.kode))
                     .filter(Boolean);
 
-                // Jika tidak ada hasil sama sekali
-                if (!selectedProfesi && !selectedKbli && otherProfesi.length === 0 && otherKbli.length === 0) {
-                    hasilContent.innerHTML = `
-                        <div class="empty-state">
-                            😕 Tidak ada hasil untuk "<strong>${keyword}</strong>"<br>
-                            <span style="font-size:13px;color:var(--text-light);">Coba kata kunci lain</span>
-                        </div>
-                    `;
-                    hasilLabel.textContent = 'Tidak ditemukan';
-                    hasilBox.classList.add('error');
-                    return;
-                }
-
-                let html = '';
-
-                // === SECTION PROFESI ===
-                // Data utama profesi
-                let mainProfesi = selectedProfesi ? [selectedProfesi] : [];
-                // Tambahkan profesi lain jika tidak ada utama
-                if (mainProfesi.length === 0 && otherProfesi.length > 0) {
-                    mainProfesi = [otherProfesi[0]];
-                    otherProfesi.shift();
-                }
-                html += renderSectionHeader('profesi', mainProfesi, mainProfesi.length > 0);
-
-                // === SECTION KBLI ===
-                let mainKbli = selectedKbli ? [selectedKbli] : [];
-                if (mainKbli.length === 0 && otherKbli.length > 0) {
-                    mainKbli = [otherKbli[0]];
-                    otherKbli.shift();
-                }
-                html += renderSectionHeader('kbli', mainKbli, mainKbli.length > 0);
-
-                // === HASIL LAINNYA ===
                 if (otherProfesi.length > 0 || otherKbli.length > 0) {
                     html += renderOtherResults(otherProfesi, otherKbli);
                 }
 
                 // === INFO SUMBER ===
-                const sourceText = '⚡ Pencocokan dari database';
+                const sourceText = usedAI ?
+                    '🤖 AI memilih dari kandidat database' :
+                    '⚡ Pencocokan langsung dari database (skor tinggi)';
                 infoAi.textContent = sourceText;
 
                 hasilContent.innerHTML = html;
@@ -948,8 +1046,8 @@
 
                 saveHistory(
                     keyword,
-                    selectedProfesi?.nomor || (otherProfesi[0]?.nomor || '000'),
-                    selectedKbli?.kode || (otherKbli[0]?.kode || '000')
+                    selectedProfesi?.nomor || '000',
+                    selectedKbli?.kode || '000'
                 );
 
             } catch (err) {
@@ -1045,7 +1143,7 @@
                 disableSearch();
                 renderHistory();
                 tokenInput.focus();
-                console.log('✅ profesi.html siap!');
+                console.log('✅ profesi.html siap dengan AI!');
                 console.log('💡 Token:', VALID_TOKENS.join(', '));
             }
         }
