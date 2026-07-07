@@ -21,11 +21,11 @@ const tools = [
         info: "Laporan Harian Petugas"
     },
     {
-        nama: "Kode Profesi",
+        nama: "Kode Profesi & KBLI",
         kategori: "Live",
         icon: "profesi",
         link: "profesi.html",
-        info: "Pencarian Kode Profesi AI"
+        info: "Pencarian Kode Profesi dan KBLI"
     },
     {
         nama: "Ayam",
