@@ -26,16 +26,16 @@ Anda adalah asisten pencarian kode profesi dan KBLI.
 
 USER MENCARI: "${keyword}"
 
-KANDIDAT PROFESI TERBAIK:
+KANDIDAT PROFESI TERBAIK (dari database):
 ${profesiCandidates || 'Tidak ada kandidat'}
 
-KANDIDAT KBLI TERBAIK:
+KANDIDAT KBLI TERBAIK (dari database):
 ${kbliCandidates || 'Tidak ada kandidat'}
 
 TUGAS ANDA:
 1. Pilih SATU kode profesi yang paling sesuai dari daftar kandidat.
 2. Pilih SATU kode KBLI yang paling sesuai dari daftar kandidat.
-3. Jika tidak ada yang cocok, gunakan kode 185 untuk profesi dengan saran.
+3. Jika tidak ada yang cocok, gunakan kode 185 untuk profesi.
 4. Jika tidak ada KBLI yang cocok, gunakan kode 0 untuk KBLI.
 
 FORMAT JAWABAN (WAJIB):
@@ -45,13 +45,10 @@ CONTOH:
 034|86201
 
 CONTOH (jika tidak ada profesi cocok):
-185|86201 (saran: terapis anak)
+185|86201
 
 CONTOH (jika tidak ada KBLI cocok):
 034|0
-
-CONTOH (jika tidak ada keduanya):
-185|0 (saran: pekerja seni)
 
 JAWAB HANYA DENGAN FORMAT TERSEBUT. JANGAN TAMBAHKAN KATA LAIN.
 `;
@@ -66,7 +63,7 @@ JAWAB HANYA DENGAN FORMAT TERSEBUT. JANGAN TAMBAHKAN KATA LAIN.
                 model: 'llama-3.3-70b-versatile',
                 messages: [{ role: 'user', content: prompt }],
                 temperature: 0.2,
-                max_tokens: 80
+                max_tokens: 60
             })
         });
 
