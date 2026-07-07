@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pencarian Kode Profesi & KBLI</title>
+    <title>🔍 Cari Kode Profesi & KBLI</title>
+    <script src="https://cdn.jsdelivr.net/npm/minisearch@7.1.1/dist/umd/index.min.js">
+    </script>
     <style>
         :root {
             --primary: #006e16;
@@ -19,9 +21,16 @@
             --radius: 18px;
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             --transition: 0.25s ease;
+            --danger: #c62828;
+            --warning: #e65100;
+            --success: #155724;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -35,7 +44,7 @@
 
         .container {
             width: 100%;
-            max-width: 560px;
+            max-width: 640px;
             align-self: flex-start;
         }
 
@@ -77,18 +86,9 @@
             gap: 8px;
         }
 
-        .section-title .badge {
-            font-size: 10px;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
+        .form-group {
+            margin-bottom: 16px;
         }
-
-        .badge-token { background: #fff3cd; color: #856404; }
-        .badge-free { background: #d4edda; color: #155724; }
-
-        .form-group { margin-bottom: 16px; }
 
         label {
             display: block;
@@ -100,7 +100,8 @@
             letter-spacing: 0.5px;
         }
 
-        input {
+        input[type="text"],
+        input[type="password"] {
             width: 100%;
             padding: 14px 16px;
             border: 2px solid var(--border);
@@ -141,22 +142,39 @@
             white-space: nowrap;
         }
 
-        .btn-cari:hover { background: var(--primary-hover); }
-        .btn-cari:active { transform: scale(0.98); }
-        .btn-cari:disabled { background: #aaa; cursor: not-allowed; }
-
-        .btn-secondary {
-            background: var(--secondary);
+        .btn-cari:hover:not(:disabled) {
+            background: var(--primary-hover);
         }
-        .btn-secondary:hover { background: var(--secondary-hover); }
+        .btn-cari:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+        .btn-cari:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
+        .token-status {
+            font-size: 13px;
+            margin-top: 6px;
+            min-height: 20px;
+        }
+        .token-status.success {
+            color: var(--success);
+        }
+        .token-status.error {
+            color: var(--danger);
+        }
+        .token-status.info {
+            color: var(--warning);
+        }
 
         .hasil-box {
             margin-top: 16px;
-            background: #e8f5e9;
-            border: 2px solid #a5d6a7;
             border-radius: 14px;
             padding: 16px;
             display: none;
+            border: 2px solid #a5d6a7;
+            background: #e8f5e9;
         }
 
         .hasil-box.show {
@@ -164,9 +182,20 @@
             animation: fadeIn 0.3s ease;
         }
 
+        .hasil-box.error {
+            border-color: #fcc;
+            background: #fff5f5;
+        }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .hasil-label {
@@ -178,38 +207,260 @@
             font-weight: 600;
         }
 
-        .hasil-profesi {
-            font-size: 20px;
-            font-weight: 800;
+        /* ===== SECTION PISAH PROFESI & KBLI ===== */
+        .hasil-section {
+            margin-bottom: 16px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .hasil-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .hasil-section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .hasil-section-header .icon {
+            font-size: 16px;
+        }
+
+        .hasil-section-header .count {
+            font-size: 11px;
+            font-weight: 400;
+            opacity: 0.7;
+            margin-left: auto;
+        }
+
+        .header-profesi {
+            background: #e8f5e9;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .header-kbli {
+            background: #e3f2fd;
+            color: var(--secondary);
+            border-bottom: 2px solid var(--secondary);
+        }
+
+        .header-kosong {
+            background: #f5f5f5;
+            color: var(--text-light);
+            border-bottom: 2px solid #ddd;
+        }
+
+        .header-kosong .icon {
+            opacity: 0.5;
+        }
+
+        .hasil-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .hasil-item:last-child {
+            border-bottom: none;
+        }
+        .hasil-item:hover {
+            background: #f8f9fa;
+        }
+
+        .hasil-item .header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .hasil-item .kode {
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .kode-profesi {
             color: var(--primary);
         }
 
-        .hasil-kode { font-size: 13px; color: var(--text-light); margin-top: 2px; }
+        .kode-kbli {
+            color: var(--secondary);
+        }
 
-        .error-box { background: #fff5f5; border-color: #fcc; }
-        .error-box .hasil-profesi { color: #c62828; font-size: 15px; font-weight: 600; }
+        .hasil-item .nama {
+            font-weight: 600;
+            font-size: 15px;
+            flex: 1;
+        }
 
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 24px;
+        .hasil-item .arrow {
+            font-size: 12px;
+            margin-left: auto;
             color: var(--text-light);
-            text-decoration: none;
-            font-size: 13px;
         }
-        .back-link:hover { color: var(--primary); }
 
-        .petunjuk {
-            background: #fff8e1;
-            border: 1px solid #ffe082;
+        .hasil-item .badge-ai {
+            font-size: 10px;
+            background: var(--primary);
+            color: #fff;
+            padding: 2px 8px;
             border-radius: 10px;
-            padding: 12px 14px;
-            margin-top: 12px;
-            font-size: 13px;
-            color: #e65100;
-            display: none;
+            font-weight: 600;
+            text-transform: uppercase;
         }
-        .petunjuk.show { display: block; }
+
+        .hasil-item .detail {
+            display: none;
+            margin-top: 10px;
+            padding: 12px 16px;
+            background: #f9f9f9;
+            border-left: 3px solid var(--primary);
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text);
+        }
+
+        .hasil-item .detail-kbli {
+            border-left-color: var(--secondary);
+        }
+
+        .hasil-item .detail.show {
+            display: block;
+        }
+
+        .hasil-lainnya {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .hasil-lainnya .label {
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .hasil-lainnya .item {
+            display: inline-block;
+            margin: 2px 6px 2px 0;
+            cursor: pointer;
+            color: var(--secondary);
+            text-decoration: underline;
+        }
+
+        .hasil-lainnya .item:hover {
+            color: var(--secondary-hover);
+        }
+
+        .history-box {
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+        .history-box .label {
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-item .query {
+            font-weight: 500;
+        }
+        .history-item .codes {
+            color: var(--text-light);
+            font-size: 12px;
+        }
+        .history-item .time {
+            color: var(--text-light);
+            font-size: 11px;
+        }
+
+        .info-ai {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 12px;
+            text-align: center;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+
+        .loading-text {
+            color: var(--text-light);
+            font-size: 14px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .empty-state {
+            color: var(--text-light);
+            padding: 16px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .token-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .token-row input {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .token-row .btn-ganti {
+            background: var(--secondary);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+            font-family: inherit;
+        }
+
+        .token-row .btn-ganti:hover:not(:disabled) {
+            background: var(--secondary-hover);
+        }
+        .token-row .btn-ganti:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
 
         .spinner {
             display: inline-block;
@@ -220,494 +471,588 @@
             border-radius: 50%;
             animation: spin 0.6s linear infinite;
             margin-right: 8px;
+            vertical-align: middle;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* ===== KBLI Styles ===== */
-        .kbli-item {
-            padding: 12px 16px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .kbli-item:hover { background: #f0f8ff; }
-        .kbli-item:last-child { border-bottom: none; }
-        .kbli-kode {
-            font-weight: 700;
-            font-size: 16px;
-            color: var(--secondary);
-        }
-        .kbli-judul {
-            font-size: 15px;
-            font-weight: 600;
-            margin: 2px 0;
-        }
-        .kbli-cuplikan {
-            font-size: 14px;
-            color: var(--text-light);
-            margin-top: 2px;
-        }
-        .kbli-detail {
-            display: none;
-            margin-top: 10px;
-            padding: 12px 16px;
-            background: #f9f9f9;
-            border-left: 3px solid var(--secondary);
-            border-radius: 6px;
-            font-size: 14px;
-            line-height: 1.6;
-            color: var(--text);
-        }
-        .arrow {
-            font-size: 12px;
-            margin-right: 6px;
-            display: inline-block;
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         @media (max-width: 480px) {
-            .input-group { flex-direction: column; }
-            .btn-cari { width: 100%; justify-content: center; }
-            .card { padding: 20px 16px; }
+            .input-group {
+                flex-direction: column;
+            }
+            .btn-cari {
+                width: 100%;
+                justify-content: center;
+            }
+            .card {
+                padding: 20px 16px;
+            }
+            .hasil-item .header {
+                flex-wrap: wrap;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="card">
-        <h1>🔍 Cari Kode Profesi & KBLI</h1>
-        <p class="subtitle">Cari kode profesi (pakai token) atau KBLI (gratis)</p>
+    <div class="container">
+        <div class="card">
+            <h1>🔍 Cari Kode Profesi & KBLI</h1>
+            <p class="subtitle">Masukkan token, lalu cari pekerjaan atau usaha</p>
 
-        <!-- PROFESI -->
-        <div class="section-title">
-            👤 Profesi / Pekerjaan
-            <span class="badge badge-token">🔒 Token</span>
-        </div>
-
-        <div class="form-group">
-            <label for="inputProfesi">Nama Pekerjaan</label>
-            <div class="input-group">
-                <input type="text" id="inputProfesi" placeholder="Contoh: tukang somay, guru..." autocomplete="off">
-                <button class="btn-cari" id="btnCariProfesi">Cari</button>
+            <!-- TOKEN -->
+            <div class="section-title">🔑 Token</div>
+            <div class="form-group">
+                <div class="token-row">
+                    <input type="password" id="tokenInput" placeholder="Masukkan token..." autocomplete="off">
+                    <button class="btn-ganti" id="btnGantiToken">✕ Ganti</button>
+                </div>
+                <div class="token-status" id="tokenStatus"></div>
             </div>
-        </div>
 
-        <div class="hasil-box" id="hasilBoxProfesi">
-            <div class="hasil-label" id="hasilLabelProfesi">Hasil Pencarian</div>
-            <div class="hasil-profesi" id="hasilJudulProfesi"></div>
-            <div class="hasil-kode" id="hasilKodeProfesi"></div>
-        </div>
-        <div class="petunjuk" id="petunjukSaranProfesi"></div>
+            <hr class="divider">
 
-        <hr class="divider">
-
-        <!-- KBLI -->
-        <div class="section-title">
-            📂 KBLI 2025
-            <span class="badge badge-free">🌐 Gratis</span>
-        </div>
-
-        <div class="form-group">
-            <label for="inputKbli">Cari KBLI</label>
-            <div class="input-group">
-                <input type="text" id="inputKbli" placeholder="Contoh: pertanian, teknologi..." autocomplete="off">
-                <button class="btn-cari btn-secondary" id="btnCariKbli">Cari</button>
+            <!-- SEARCH -->
+            <div class="section-title">🔍 Cari Pekerjaan / Usaha</div>
+            <div class="form-group">
+                <div class="input-group">
+                    <input type="text" id="searchInput" placeholder="Contoh: dokter anak, tukang kayu, programmer..." autocomplete="off" disabled>
+                    <button class="btn-cari" id="btnCari" disabled>🔍 Cari</button>
+                </div>
             </div>
-        </div>
 
-        <div class="hasil-box" id="hasilBoxKbli">
-            <div class="hasil-label" id="hasilLabelKbli">📊 Memuat data...</div>
-            <div id="hasilListKbli"></div>
-        </div>
+            <!-- HASIL -->
+            <div class="hasil-box" id="hasilBox">
+                <div class="hasil-label" id="hasilLabel">Hasil Pencarian</div>
+                <div id="hasilContent"></div>
+                <div class="info-ai" id="infoAi"></div>
+            </div>
 
+            <!-- HISTORY -->
+            <div class="history-box" id="historyBox">
+                <div class="label">📜 Riwayat Pencarian</div>
+                <div id="historyContent">
+                    <div class="empty-state">Belum ada riwayat</div>
+                </div>
+            </div>
+
+        </div>
     </div>
-    <a href="index.html" class="back-link">← Kembali ke Halaman Utama</a>
-</div>
 
-<script>
-    // ============================================================
-    // 1. PROFESI (dengan Token)
-    // ============================================================
-    const VALID_TOKENS = [
-        'rajadesahera', 'rajadesalena', 'rajadesalina',
-        'rajadesanina', 'rajadesasalman', 'purwarajauher', 'purwarajaehat'
-    ];
+    <script>
+        // ============================================================
+        // FINAL VERSION - profesi.html
+        // ============================================================
 
-    function validateToken(token) {
-        return VALID_TOKENS.includes(token.trim().toLowerCase());
-    }
+        const VALID_TOKENS = ['lena004', 'lina004', 'hera004', 'salman004', 'nina004', 'uher007', 'ehat007'];
+        let profesiData = [];
+        let kbliData = [];
+        let profesiIndex = null;
+        let kbliIndex = null;
+        let isIndexed = false;
+        let isSearching = false;
 
-    const DAFTAR_PROFESI = `000. Tidak Bekerja
-001. Agen Tenaga Kerja
-002. Ahli Sejarah dan Cagar Budaya
-003. Akuntan
-004. Analis Keuangan
-005. Anggota DPD
-006. Anggota DPR RI/MPR RI
-007. Anggota DPRD Provinsi/Anggota DPRD Kabupaten/Kota
-008. Apoteker
-009. Arsiparis
-010. Arsitek
-011. Asisten Apoteker
-013. Atlet/Olahragawan
-014. Awak Kapal
-018. Bidan
-021. Buruh Angkut Barang
-022. Buruh Bangunan
-023. Buruh Industri
-024. Buruh Perikanan
-025. Buruh Pertambangan
-026. Buruh Pertanian/Kehutanan
-027. Buruh Peternakan
-028. Camat
-029. Chef
-030. Chief Executive Officer (CEO)
-031. Dokter Gigi
-032. Dokter Hewan
-033. Dokter Spesialis
-034. Dokter Umum
-035. Dosen
-038. Fotografer
-039. Gembala
-040. Gubernur
-041. Guru
-042. Hakim
-043. Hakim Agung
-044. Imam Masjid
-045. Jaksa
-048. Juru Gambar Teknik/Drafter
-049. Kameramen
-050. Kapten Kapal
-051. Kasir
-052. Kepala Desa
-053. Ketua Adat
-054. Ketua Organisasi
-055. Konsultan
-056. Kreator Konten
-058. Kurir
-060. Makelar
-061. Manajer
-063. Mekanik
-069. Operator Mesin
-072. Paraji
-073. Paranormal
-074. Pastor
-075. Pedagang
-076. Pedagang Asongan/Keliling Makanan
-077. Pedagang Asongan/Keliling Nonmakanan
-078. Pedagang Online
-079. Pegawai Pemerintah dengan Perjanjian Kerja (PPPK)
-080. Pekerja Garmen/Konveksi
-081. Pekerja Percetakan
-082. Pekerja Profesional Penjualan (Agen Asuransi, Sales Penjualan, dll)
-083. Pekerja Sosial
-084. Pelaku Ekosistem Musik
-086. Pelaku Ekosistem Seni Pertunjukan
-087. Pelaku Ekosistem Seni Rupa dan Kriya
-088. Pelatih/Instruktur Olahraga
-089. Pelayan Toko
-090. Pembantu/Asisten Rumah Tangga
-091. Pemberi Pinjaman
-092. Pembuat Makanan/Juru Masak
-093. Pembuat Minuman (Barista, Bartender, dll)
-094. Pembuat Rokok/Cerutu/Tembakau Gulung
-095. Pembuat Sepatu dan Tas
-096. Pembudi Daya Ikan dan Biota Air Lainnya
-097. Pemulung
-098. Penagih Hutang (Debt Collector)
-099. Penasihat Spiritual
-100. Penata Busana
-101. Penata Rambut
-102. Penata Rias
-107. Pengacara
-108. Pengasuh Anak (Baby Sitter)
-109. Pengelola Gedung/Properti
-110. Pengemudi Ojek Online
-111. Pengemudi Ojek Pangkalan
-112. Pengepul
-113. Penjaga Keamanan/Satpam
-114. Penjahit
-115. Penulis
-116. Penyelenggara Acara (Event Organizer/EO)
-119. Perajin Batu
-120. Perajin Kayu, Bambu, dan Anyaman
-121. Perajin Kulit dan Tekstil
-122. Perajin Logam
-123. Perajin Perhiasan
-124. Perajin Tembikar/Keramik
-127. Perangkat Desa
-128. Perawat
-129. Petani/Pekebun/Petani Hutan
-130. Peternak
-131. Petugas Pemadam Kebakaran
-132. Petugas Stasiun Pengisian Bahan Bakar
-133. Pilot
-135. PNS Fungsional Tertentu
-136. PNS Fungsional Umum
-137. PNS Struktural
-138. Polisi
-139. Pramugara/i
-140. Pramusaji
-142. Programer
-143. Psikiater
-144. Psikolog
-145. Pustakawan
-146. Resepsionis
-147. Sekretaris
-148. Seniman/Artis
-149. Sopir
-150. Supervisor/Mandor
-151. Tabib
-152. Teknisi
-153. Teller Bank
-154. Tenaga Cuci
-155. Tenaga Humas
-156. Tenaga Kebersihan
-157. Tenaga Tata Usaha
-158. Tentara Nasional Indonesia (TNI)
-159. Tukang Bangunan
-160. Tukang Cat
-161. Tukang Cukur
-162. Tukang Fotokopi
-163. Tukang Gigi
-164. Tukang Kaca
-165. Tukang Kayu
-166. Tukang Kunci
-167. Tukang Las/Pandai Besi
-168. Tukang Listrik
-169. Tukang Pijat
-170. Tukang Pipa
-171. Tukang Sablon
-172. Tukang Sol Sepatu
-173. Tukang Tambal Ban
-174. Tukang Tebang Kayu
-176. Ustaz/Mubalig
-182. Wartawan
-185. Lainnya (tuliskan: ....................................)
-999. Tidak Tahu`;
+        const tokenInput = document.getElementById('tokenInput');
+        const tokenStatus = document.getElementById('tokenStatus');
+        const btnGantiToken = document.getElementById('btnGantiToken');
+        const searchInput = document.getElementById('searchInput');
+        const btnCari = document.getElementById('btnCari');
+        const hasilBox = document.getElementById('hasilBox');
+        const hasilLabel = document.getElementById('hasilLabel');
+        const hasilContent = document.getElementById('hasilContent');
+        const infoAi = document.getElementById('infoAi');
+        const historyContent = document.getElementById('historyContent');
 
-    async function cariProfesi() {
-        const keyword = document.getElementById('inputProfesi').value.trim();
-        const btn = document.getElementById('btnCariProfesi');
-        const hasilBox = document.getElementById('hasilBoxProfesi');
-        const hasilLabel = document.getElementById('hasilLabelProfesi');
-        const hasilJudul = document.getElementById('hasilJudulProfesi');
-        const hasilKode = document.getElementById('hasilKodeProfesi');
-        const petunjuk = document.getElementById('petunjukSaranProfesi');
+        // ============================================================
+        // LOAD DATA
+        // ============================================================
 
-        // Validasi token
-        const token = sessionStorage.getItem('tokenProfesi');
-        if (!token || !validateToken(token)) {
-            const userToken = prompt('Masukkan token untuk pencarian profesi:');
-            if (userToken && validateToken(userToken)) {
-                sessionStorage.setItem('tokenProfesi', userToken);
-            } else {
-                alert('Token tidak valid!');
+        async function loadData() {
+            try {
+                tokenStatus.textContent = '⏳ Memuat data...';
+                tokenStatus.className = 'token-status info';
+
+                const [profesiRes, kbliRes] = await Promise.all([
+                    fetch('profesi.json'),
+                    fetch('kbli-2025.json')
+                ]);
+
+                if (!profesiRes.ok || !kbliRes.ok) throw new Error('Gagal memuat data');
+
+                profesiData = await profesiRes.json();
+                const kbliFull = await kbliRes.json();
+
+                // Potong uraian KBLI untuk ringan
+                kbliData = kbliFull.map(item => ({
+                    kode: item.kode,
+                    judul: item.judul,
+                    uraian: item.uraian ? item.uraian.substring(0, 200) + '...' : ''
+                }));
+
+                tokenStatus.textContent = '⏳ Indexing data...';
+                tokenStatus.className = 'token-status info';
+
+                // Index Profesi
+                profesiIndex = new MiniSearch({
+                    idField: 'nomor',
+                    fields: ['profesi', 'uraian'],
+                    storeFields: ['nomor', 'profesi', 'uraian'],
+                    searchOptions: { fuzzy: 0.15, prefix: true }
+                });
+                profesiIndex.addAll(profesiData);
+
+                // Index KBLI
+                kbliIndex = new MiniSearch({
+                    idField: 'kode',
+                    fields: ['judul', 'uraian'],
+                    storeFields: ['kode', 'judul', 'uraian'],
+                    searchOptions: { fuzzy: 0.1, prefix: true }
+                });
+                kbliIndex.addAll(kbliData);
+
+                isIndexed = true;
+                tokenStatus.textContent = `✅ Siap! ${profesiData.length} profesi, ${kbliData.length} KBLI`;
+                tokenStatus.className = 'token-status success';
+                console.log('✅ Data siap!');
+                return true;
+
+            } catch (err) {
+                console.error('❌ Error:', err);
+                tokenStatus.textContent = '⚠️ Error: ' + err.message;
+                tokenStatus.className = 'token-status error';
+                return false;
+            }
+        }
+
+        // ============================================================
+        // TOKEN & RATE LIMIT
+        // ============================================================
+
+        function isValidToken(token) {
+            return VALID_TOKENS.includes(token.trim().toLowerCase());
+        }
+
+        function getRateLimit(token) {
+            const key = 'rateLimit_' + token;
+            const data = localStorage.getItem(key);
+            if (data) {
+                try {
+                    const parsed = JSON.parse(data);
+                    if (Date.now() > parsed.resetAt) {
+                        const newData = { count: 0, resetAt: Date.now() + 10 * 60 * 1000 };
+                        localStorage.setItem(key, JSON.stringify(newData));
+                        return newData;
+                    }
+                    return parsed;
+                } catch (e) {
+                    const newData = { count: 0, resetAt: Date.now() + 10 * 60 * 1000 };
+                    localStorage.setItem(key, JSON.stringify(newData));
+                    return newData;
+                }
+            }
+            const newData = { count: 0, resetAt: Date.now() + 10 * 60 * 1000 };
+            localStorage.setItem(key, JSON.stringify(newData));
+            return newData;
+        }
+
+        function incrementRateLimit(token) {
+            const key = 'rateLimit_' + token;
+            const data = getRateLimit(token);
+            data.count++;
+            localStorage.setItem(key, JSON.stringify(data));
+            return data;
+        }
+
+        function getRemainingText(token) {
+            const data = getRateLimit(token);
+            const left = Math.max(0, 5 - (data.count || 0));
+            const resetIn = Math.ceil((data.resetAt - Date.now()) / 60000);
+            const resetText = resetIn > 0 ? `(reset ${resetIn} menit)` : '(reset sekarang)';
+            return `${left}/5 ${resetText}`;
+        }
+
+        function canSearch(token) {
+            const data = getRateLimit(token);
+            return (data.count || 0) < 5;
+        }
+
+        function updateTokenStatus(token) {
+            if (!token) {
+                tokenStatus.textContent = '';
+                tokenStatus.className = 'token-status';
                 return;
             }
-        }
-
-        if (!keyword) return;
-
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span> Mencari...';
-        hasilBox.classList.remove('show', 'error-box');
-        petunjuk.classList.remove('show');
-
-        try {
-            const response = await fetch('/.netlify/functions/cari-profesi', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ keyword: keyword })
-            });
-
-            const data = await response.json();
-            const jawaban = data.choices[0].message.content.trim();
-
-            if (jawaban.includes('185') && jawaban.includes('saran:')) {
-                const parts = jawaban.split('(saran:');
-                hasilJudul.textContent = parts[0].trim();
-                hasilKode.textContent = '';
-                petunjuk.textContent = '💡 Saran: ' + parts[1].replace(')', '').trim();
-                petunjuk.classList.add('show');
+            if (!isValidToken(token)) {
+                tokenStatus.textContent = '⚠️ Periksa kembali token anda';
+                tokenStatus.className = 'token-status error';
+                return;
+            }
+            const remaining = getRemainingText(token);
+            const can = canSearch(token);
+            if (can) {
+                tokenStatus.textContent = `✅ Token valid • 💡 sisa ${remaining}`;
+                tokenStatus.className = 'token-status success';
             } else {
-                hasilJudul.textContent = jawaban;
-                hasilKode.textContent = '✅ Pencocokan AI';
+                tokenStatus.textContent = `⛔ Token habis • sisa ${remaining} • ganti token`;
+                tokenStatus.className = 'token-status error';
             }
-
-            hasilLabel.textContent = 'Hasil Pencarian Profesi';
-            hasilBox.classList.add('show');
-
-        } catch (err) {
-            hasilLabel.textContent = '⚠️ Error';
-            hasilJudul.textContent = 'Gagal menghubungi server';
-            hasilKode.textContent = 'Periksa koneksi internet';
-            hasilBox.classList.add('error-box', 'show');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'Cari';
-        }
-    }
-
-    // ============================================================
-    // 2. KBLI (MANUAL SEARCH - Tanpa Library)
-    // ============================================================
-    let dataKbli = [];
-    let dataLoaded = false;
-    let aktifElement = null;
-
-    // Elemen DOM KBLI
-    const inputKbli = document.getElementById('inputKbli');
-    const btnKbli = document.getElementById('btnCariKbli');
-    const hasilBoxKbli = document.getElementById('hasilBoxKbli');
-    const hasilLabelKbli = document.getElementById('hasilLabelKbli');
-    const hasilListKbli = document.getElementById('hasilListKbli');
-
-    // Load data dari file JSON
-    fetch('kbli-2025.json')
-        .then(res => {
-            if (!res.ok) throw new Error('File kbli-2025.json tidak ditemukan (HTTP ' + res.status + ')');
-            return res.json();
-        })
-        .then(data => {
-            dataKbli = data;
-            dataLoaded = true;
-            console.log('✅ Data KBLI loaded:', dataKbli.length);
-            hasilLabelKbli.textContent = '📊 ' + dataKbli.length + ' data KBLI siap';
-        })
-        .catch(err => {
-            console.error('❌ Gagal load KBLI:', err);
-            hasilLabelKbli.textContent = '⚠️ ' + err.message;
-            hasilLabelKbli.style.color = '#c62828';
-        });
-
-    // Fungsi pencarian KBLI
-    function cariKbli() {
-        const keyword = inputKbli.value.trim();
-        console.log('🔍 cariKbli() dipanggil, keyword:', keyword);
-
-        if (!keyword) {
-            hasilLabelKbli.textContent = '⚠️ Masukkan kata kunci';
-            return;
         }
 
-        if (!dataLoaded || dataKbli.length === 0) {
-            hasilLabelKbli.textContent = '⏳ Data KBLI belum siap, tunggu sebentar...';
-            return;
+        function enableSearch() {
+            searchInput.disabled = false;
+            btnCari.disabled = false;
         }
 
-        btnKbli.disabled = true;
-        btnKbli.innerHTML = '<span class="spinner"></span> Mencari...';
-        hasilBoxKbli.classList.remove('show', 'error-box');
-        hasilListKbli.innerHTML = '';
-        aktifElement = null;
+        function disableSearch() {
+            searchInput.disabled = true;
+            btnCari.disabled = true;
+        }
 
-        try {
-            // Pecah keyword menjadi kata-kata
-            const kataKunci = keyword.toLowerCase().split(' ');
-            let hasil = [];
+        // ============================================================
+        // RENDER FUNCTIONS
+        // ============================================================
 
-            // Cari data yang mengandung SEMUA kata di judul atau uraian
-            hasil = dataKbli.filter(item => {
-                const teks = (item.judul + ' ' + item.uraian).toLowerCase();
-                return kataKunci.every(kata => teks.includes(kata));
-            });
+        function getProfesiByCode(code) {
+            return profesiData.find(p => p.nomor === code);
+        }
 
-            // Jika tidak ada hasil, coba cari dengan OR (salah satu kata)
-            if (hasil.length === 0) {
-                console.log('Fallback: mencari dengan OR...');
-                hasil = dataKbli.filter(item => {
-                    const teks = (item.judul + ' ' + item.uraian).toLowerCase();
-                    return kataKunci.some(kata => teks.includes(kata));
-                });
+        function getKbliByCode(code) {
+            return kbliData.find(k => k.kode === code);
+        }
+
+        function renderSectionHeader(type, items, isMain) {
+            const isProfesi = type === 'profesi';
+            const icon = isProfesi ? '👤' : '📂';
+            const label = isProfesi ? 'PROFESI' : 'KBLI (Usaha)';
+            const count = items ? items.length : 0;
+            const headerClass = isProfesi ? 'header-profesi' : 'header-kbli';
+
+            let html = `<div class="hasil-section">`;
+            html += `<div class="hasil-section-header ${headerClass}">`;
+            html += `<span class="icon">${icon}</span>`;
+            html += `${label}`;
+            if (isMain) {
+                html += ` <span style="font-size:10px;background:${isProfesi ? 'var(--primary)' : 'var(--secondary)'};color:#fff;padding:1px 8px;border-radius:8px;">⭐ Pilihan</span>`;
             }
+            html += `<span class="count">${count} hasil</span>`;
+            html += `</div>`;
 
-            // Tampilkan hasil (maks 5)
-            if (hasil.length > 0) {
-                const limit = Math.min(hasil.length, 5);
-                hasilLabelKbli.textContent = 'Hasil KBLI (' + limit + ' dari ' + hasil.length + ' ditemukan)';
-                let html = '';
-                for (let i = 0; i < limit; i++) {
-                    const item = hasil[i];
-                    const cuplikan = item.uraian ? item.uraian.substring(0, 120) + '...' : '';
+            if (items && items.length > 0) {
+                items.forEach(item => {
+                    const code = isProfesi ? item.nomor : item.kode;
+                    const title = isProfesi ? item.profesi : item.judul;
+                    const desc = item.uraian || '';
+                    const codeClass = isProfesi ? 'kode-profesi' : 'kode-kbli';
+                    const detailClass = isProfesi ? '' : 'detail-kbli';
+
                     html += `
-                        <div class="kbli-item" onclick="toggleDetailKbli(this)">
-                            <div>
-                                <span class="arrow">▶</span>
-                                <span class="kbli-kode">${item.kode}</span>
-                                <span class="kbli-judul">${item.judul}</span>
+                        <div class="hasil-item" onclick="toggleDetail(this)">
+                            <div class="header">
+                                <span class="kode ${codeClass}">${code}</span>
+                                <span class="nama">${title}</span>
+                                <span class="arrow">▼</span>
                             </div>
-                            <div class="kbli-cuplikan">${cuplikan}</div>
-                            <div class="kbli-detail">${item.uraian || 'Tidak ada uraian'}</div>
+                            <div class="detail ${detailClass}">${desc || 'Tidak ada uraian'}</div>
                         </div>
                     `;
-                }
-                hasilListKbli.innerHTML = html;
-                hasilBoxKbli.classList.add('show');
+                });
             } else {
-                hasilLabelKbli.textContent = 'Tidak ditemukan';
-                hasilListKbli.innerHTML = '<div style="color:var(--text-light);padding:12px;">Tidak ada hasil untuk "<strong>' + keyword + '</strong>"</div>';
-                hasilBoxKbli.classList.add('show');
+                html += `
+                    <div style="padding:12px 16px;color:var(--text-light);font-size:14px;">
+                        <span style="opacity:0.5;">—</span> Tidak ada hasil
+                    </div>
+                `;
             }
 
-        } catch (err) {
-            console.error('Error KBLI:', err);
-            hasilLabelKbli.textContent = '⚠️ Error';
-            hasilListKbli.innerHTML = '<div style="color:#c62828;">Terjadi kesalahan: ' + err.message + '</div>';
-            hasilBoxKbli.classList.add('error-box', 'show');
-        } finally {
-            btnKbli.disabled = false;
-            btnKbli.textContent = 'Cari';
-        }
-    }
-
-    // Fungsi toggle detail accordion
-    window.toggleDetailKbli = function(clickedElement) {
-        const detail = clickedElement.querySelector('.kbli-detail');
-        const arrow = clickedElement.querySelector('.arrow');
-
-        if (aktifElement === clickedElement) {
-            detail.style.display = 'none';
-            arrow.textContent = '▶';
-            aktifElement = null;
-            return;
+            html += `</div>`;
+            return html;
         }
 
-        if (aktifElement) {
-            const oldDetail = aktifElement.querySelector('.kbli-detail');
-            const oldArrow = aktifElement.querySelector('.arrow');
-            oldDetail.style.display = 'none';
-            oldArrow.textContent = '▶';
+        function renderOtherResults(profesiCandidates, kbliCandidates) {
+            let html = '<div class="hasil-lainnya" style="margin-top:16px;">';
+            html += '<div class="label">📋 Hasil lainnya (database)</div>';
+
+            if (profesiCandidates && profesiCandidates.length > 0) {
+                html += '<div style="margin-top:4px;"><strong>👤 Profesi:</strong> ';
+                profesiCandidates.forEach((item, i) => {
+                    const data = getProfesiByCode(item.nomor);
+                    if (data) {
+                        html +=
+                            `<span class="item" onclick="showDetail('profesi','${data.nomor}')">${data.nomor} - ${data.profesi}</span>`;
+                        if (i < profesiCandidates.length - 1) html += ' | ';
+                    }
+                });
+                html += '</div>';
+            }
+
+            if (kbliCandidates && kbliCandidates.length > 0) {
+                html += '<div style="margin-top:4px;"><strong>📂 KBLI:</strong> ';
+                kbliCandidates.forEach((item, i) => {
+                    const data = getKbliByCode(item.kode);
+                    if (data) {
+                        html +=
+                            `<span class="item" onclick="showDetail('kbli','${data.kode}')">${data.kode} - ${data.judul}</span>`;
+                        if (i < kbliCandidates.length - 1) html += ' | ';
+                    }
+                });
+                html += '</div>';
+            }
+
+            html += '</div>';
+            return html;
         }
 
-        detail.style.display = 'block';
-        arrow.textContent = '▼';
-        aktifElement = clickedElement;
-    };
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+            if (history.length === 0) {
+                historyContent.innerHTML = '<div class="empty-state">Belum ada riwayat</div>';
+                return;
+            }
+            let html = '';
+            history.slice(0, 10).forEach(item => {
+                const time = new Date(item.timestamp);
+                const timeStr = time.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                html += `
+                    <div class="history-item">
+                        <span class="query">${item.query}</span>
+                        <span class="codes">${item.profesi || '000'} | ${item.kbli || '000'}</span>
+                        <span class="time">${timeStr}</span>
+                    </div>
+                `;
+            });
+            historyContent.innerHTML = html;
+        }
 
-    // Event listener untuk KBLI
-    btnKbli.addEventListener('click', cariKbli);
-    inputKbli.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') cariKbli();
-    });
+        function saveHistory(query, profesiCode, kbliCode) {
+            const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+            history.unshift({
+                query: query,
+                profesi: profesiCode || '000',
+                kbli: kbliCode || '000',
+                timestamp: Date.now()
+            });
+            if (history.length > 50) history.pop();
+            localStorage.setItem('searchHistory', JSON.stringify(history));
+            renderHistory();
+        }
 
-    // Event listener untuk profesi
-    document.getElementById('inputProfesi').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') cariProfesi();
-    });
-    document.getElementById('btnCariProfesi').addEventListener('click', cariProfesi);
+        // ============================================================
+        // MAIN SEARCH
+        // ============================================================
 
-    // Cek token di awal
-    const savedToken = sessionStorage.getItem('tokenProfesi');
-    if (savedToken && validateToken(savedToken)) {
-        // Token valid, tidak perlu prompt
-    }
+        async function doSearch() {
+            const keyword = searchInput.value.trim();
+            if (!keyword) return;
+            if (!isIndexed) {
+                tokenStatus.textContent = '⏳ Data sedang dimuat...';
+                tokenStatus.className = 'token-status info';
+                return;
+            }
 
-    console.log('✅ profesi.html siap digunakan');
-</script>
+            const token = tokenInput.value.trim();
+            if (!isValidToken(token)) {
+                tokenStatus.textContent = '⚠️ Token tidak valid';
+                tokenStatus.className = 'token-status error';
+                return;
+            }
+            if (!canSearch(token)) {
+                tokenStatus.textContent = '⛔ Token habis, silakan ganti token';
+                tokenStatus.className = 'token-status error';
+                return;
+            }
+            if (isSearching) return;
+
+            isSearching = true;
+            btnCari.disabled = true;
+            btnCari.innerHTML = '<span class="spinner"></span> Mencari...';
+            hasilBox.classList.remove('show', 'error');
+            hasilContent.innerHTML = '<div class="loading-text">🔍 Mencari...</div>';
+            hasilBox.classList.add('show');
+            hasilLabel.textContent = '🔍 Mencari...';
+            infoAi.textContent = '';
+
+            try {
+                const profesiResults = profesiIndex.search(keyword, { limit: 5 });
+                const kbliResults = kbliIndex.search(keyword, { limit: 5 });
+
+                // Pilih yang terbaik
+                const selectedProfesi = profesiResults.length > 0 ? getProfesiByCode(profesiResults[0].nomor) : null;
+                const selectedKbli = kbliResults.length > 0 ? getKbliByCode(kbliResults[0].kode) : null;
+
+                // Hasil lainnya (tanpa yang sudah dipilih)
+                const otherProfesi = profesiResults
+                    .filter(p => p.nomor !== selectedProfesi?.nomor)
+                    .slice(0, 3)
+                    .map(p => getProfesiByCode(p.nomor))
+                    .filter(Boolean);
+
+                const otherKbli = kbliResults
+                    .filter(k => k.kode !== selectedKbli?.kode)
+                    .slice(0, 3)
+                    .map(k => getKbliByCode(k.kode))
+                    .filter(Boolean);
+
+                // Jika tidak ada hasil sama sekali
+                if (!selectedProfesi && !selectedKbli && otherProfesi.length === 0 && otherKbli.length === 0) {
+                    hasilContent.innerHTML = `
+                        <div class="empty-state">
+                            😕 Tidak ada hasil untuk "<strong>${keyword}</strong>"<br>
+                            <span style="font-size:13px;color:var(--text-light);">Coba kata kunci lain</span>
+                        </div>
+                    `;
+                    hasilLabel.textContent = 'Tidak ditemukan';
+                    hasilBox.classList.add('error');
+                    return;
+                }
+
+                let html = '';
+
+                // === SECTION PROFESI ===
+                // Data utama profesi
+                let mainProfesi = selectedProfesi ? [selectedProfesi] : [];
+                // Tambahkan profesi lain jika tidak ada utama
+                if (mainProfesi.length === 0 && otherProfesi.length > 0) {
+                    mainProfesi = [otherProfesi[0]];
+                    otherProfesi.shift();
+                }
+                html += renderSectionHeader('profesi', mainProfesi, mainProfesi.length > 0);
+
+                // === SECTION KBLI ===
+                let mainKbli = selectedKbli ? [selectedKbli] : [];
+                if (mainKbli.length === 0 && otherKbli.length > 0) {
+                    mainKbli = [otherKbli[0]];
+                    otherKbli.shift();
+                }
+                html += renderSectionHeader('kbli', mainKbli, mainKbli.length > 0);
+
+                // === HASIL LAINNYA ===
+                if (otherProfesi.length > 0 || otherKbli.length > 0) {
+                    html += renderOtherResults(otherProfesi, otherKbli);
+                }
+
+                // === INFO SUMBER ===
+                const sourceText = '⚡ Pencocokan dari database';
+                infoAi.textContent = sourceText;
+
+                hasilContent.innerHTML = html;
+                hasilLabel.textContent = '✅ Hasil Pencarian';
+                hasilBox.classList.remove('error');
+
+                // Update rate limit & history
+                incrementRateLimit(token);
+                updateTokenStatus(token);
+
+                saveHistory(
+                    keyword,
+                    selectedProfesi?.nomor || (otherProfesi[0]?.nomor || '000'),
+                    selectedKbli?.kode || (otherKbli[0]?.kode || '000')
+                );
+
+            } catch (err) {
+                console.error('Search error:', err);
+                hasilContent.innerHTML = `
+                    <div class="empty-state">⚠️ Error: ${err.message}</div>
+                `;
+                hasilLabel.textContent = '⚠️ Error';
+                hasilBox.classList.add('error');
+            } finally {
+                isSearching = false;
+                btnCari.disabled = false;
+                btnCari.textContent = '🔍 Cari';
+            }
+        }
+
+        // ============================================================
+        // UI HELPERS
+        // ============================================================
+
+        window.toggleDetail = function(el) {
+            const detail = el.querySelector('.detail');
+            const arrow = el.querySelector('.arrow');
+            if (detail) {
+                const isOpen = detail.classList.contains('show');
+                detail.classList.toggle('show');
+                arrow.textContent = isOpen ? '▼' : '▲';
+            }
+        };
+
+        window.showDetail = function(type, code) {
+            document.querySelectorAll('.hasil-item').forEach(item => {
+                const kodeEl = item.querySelector('.kode');
+                if (kodeEl && kodeEl.textContent.trim() === code) {
+                    const detail = item.querySelector('.detail');
+                    const arrow = item.querySelector('.arrow');
+                    if (detail && !detail.classList.contains('show')) {
+                        detail.classList.add('show');
+                        if (arrow) arrow.textContent = '▲';
+                    }
+                    item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        };
+
+        // ============================================================
+        // EVENT LISTENERS
+        // ============================================================
+
+        tokenInput.addEventListener('input', function() {
+            const token = this.value.trim();
+            if (!token) {
+                tokenStatus.textContent = '';
+                tokenStatus.className = 'token-status';
+                disableSearch();
+                return;
+            }
+            if (isValidToken(token)) {
+                const can = canSearch(token);
+                if (can) enableSearch();
+                else disableSearch();
+                updateTokenStatus(token);
+            } else {
+                tokenStatus.textContent = '⚠️ Periksa kembali token anda';
+                tokenStatus.className = 'token-status error';
+                disableSearch();
+            }
+        });
+
+        btnGantiToken.addEventListener('click', function() {
+            tokenInput.value = '';
+            tokenInput.focus();
+            tokenStatus.textContent = '';
+            tokenStatus.className = 'token-status';
+            disableSearch();
+        });
+
+        btnCari.addEventListener('click', doSearch);
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                doSearch();
+            }
+        });
+
+        // ============================================================
+        // INIT
+        // ============================================================
+
+        async function init() {
+            const loaded = await loadData();
+            if (loaded) {
+                disableSearch();
+                renderHistory();
+                tokenInput.focus();
+                console.log('✅ profesi.html siap!');
+                console.log('💡 Token:', VALID_TOKENS.join(', '));
+            }
+        }
+
+        setInterval(renderHistory, 30000);
+        init();
+    </script>
 
 </body>
 </html>
