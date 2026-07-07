@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pencarian Kode Profesi</title>
+    <title>Pencarian Kode Profesi & KBLI</title>
     <style>
         :root {
             --primary: #006e16;
             --primary-hover: #00881c;
             --primary-alpha: rgba(0, 110, 22, 0.12);
+            --secondary: #0066cc;
+            --secondary-hover: #0052a3;
             --bg: #f5f7f6;
             --card: #ffffff;
             --text: #222;
@@ -33,7 +35,7 @@
 
         .container {
             width: 100%;
-            max-width: 500px;
+            max-width: 560px;
             align-self: flex-start;
         }
 
@@ -58,6 +60,33 @@
             font-size: 13px;
             margin-bottom: 24px;
         }
+
+        .divider {
+            border: none;
+            border-top: 2px solid var(--border);
+            margin: 24px 0;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title .badge {
+            font-size: 10px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-token { background: #fff3cd; color: #856404; }
+        .badge-free { background: #d4edda; color: #155724; }
 
         .form-group { margin-bottom: 16px; }
 
@@ -87,9 +116,17 @@
             box-shadow: 0 0 0 3px var(--primary-alpha);
         }
 
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-group input {
+            flex: 1;
+        }
+
         .btn-cari {
-            width: 100%;
-            padding: 14px;
+            padding: 14px 24px;
             background: var(--primary);
             color: #fff;
             border: none;
@@ -101,14 +138,20 @@
             font-family: inherit;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            white-space: nowrap;
         }
 
         .btn-cari:hover { background: var(--primary-hover); }
         .btn-cari:active { transform: scale(0.98); }
         .btn-cari:disabled { background: #aaa; cursor: not-allowed; }
 
+        .btn-secondary {
+            background: var(--secondary);
+        }
+        .btn-secondary:hover { background: var(--secondary-hover); }
+
         .hasil-box {
-            margin-top: 20px;
+            margin-top: 16px;
             background: #e8f5e9;
             border: 2px solid #a5d6a7;
             border-radius: 14px;
@@ -116,7 +159,10 @@
             display: none;
         }
 
-        .hasil-box.show { display: block; animation: fadeIn 0.3s ease; }
+        .hasil-box.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(5px); }
@@ -126,7 +172,7 @@
         .hasil-label {
             font-size: 12px;
             color: var(--text-light);
-            margin-bottom: 4px;
+            margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: 600;
@@ -164,36 +210,137 @@
             display: none;
         }
         .petunjuk.show { display: block; }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== KBLI Styles ===== */
+        .kbli-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .kbli-item:hover { background: #f0f8ff; }
+        .kbli-item:last-child { border-bottom: none; }
+        .kbli-kode {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--secondary);
+        }
+        .kbli-judul {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 2px 0;
+        }
+        .kbli-cuplikan {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+        .kbli-detail {
+            display: none;
+            margin-top: 10px;
+            padding: 12px 16px;
+            background: #f9f9f9;
+            border-left: 3px solid var(--secondary);
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text);
+        }
+        .arrow {
+            font-size: 12px;
+            margin-right: 6px;
+            display: inline-block;
+        }
+
+        @media (max-width: 480px) {
+            .input-group { flex-direction: column; }
+            .btn-cari { width: 100%; justify-content: center; }
+            .card { padding: 20px 16px; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="card">
-            <h1>Pencarian Kode Profesi</h1>
-            <p class="subtitle">Ketik nama pekerjaan untuk mendapatkan kode profesi yang sesuai</p>
+<div class="container">
+    <div class="card">
+        <h1>🔍 Cari Kode Profesi & KBLI</h1>
+        <p class="subtitle">Cari kode profesi (pakai token) atau KBLI (gratis)</p>
 
-            <div class="form-group">
-                <label for="inputProfesi">Nama Pekerjaan</label>
-                <input type="text" id="inputProfesi" placeholder="Contoh: tukang somay, guru ngaji, jualan pulsa..." autocomplete="off">
-            </div>
-
-            <button class="btn-cari" id="btnCari" onclick="cariProfesi()">Cari Profesi</button>
-
-            <div class="hasil-box" id="hasilBox">
-                <div class="hasil-label" id="hasilLabel">Hasil Pencarian</div>
-                <div class="hasil-profesi" id="hasilProfesi"></div>
-                <div class="hasil-kode" id="hasilKode"></div>
-            </div>
-
-            <div class="petunjuk" id="petunjukSaran"></div>
+        <!-- PROFESI -->
+        <div class="section-title">
+            👤 Profesi / Pekerjaan
+            <span class="badge badge-token">🔒 Token</span>
         </div>
 
-        <a href="index.html" class="back-link">← Kembali ke Halaman Utama</a>
-    </div>
+        <div class="form-group">
+            <label for="inputProfesi">Nama Pekerjaan</label>
+            <div class="input-group">
+                <input type="text" id="inputProfesi" placeholder="Contoh: tukang somay, guru..." autocomplete="off">
+                <button class="btn-cari" id="btnCariProfesi">Cari</button>
+            </div>
+        </div>
 
-    <script>
-        const DAFTAR_PROFESI = `000. Tidak Bekerja
+        <div class="hasil-box" id="hasilBoxProfesi">
+            <div class="hasil-label" id="hasilLabelProfesi">Hasil Pencarian</div>
+            <div class="hasil-profesi" id="hasilJudulProfesi"></div>
+            <div class="hasil-kode" id="hasilKodeProfesi"></div>
+        </div>
+        <div class="petunjuk" id="petunjukSaranProfesi"></div>
+
+        <hr class="divider">
+
+        <!-- KBLI -->
+        <div class="section-title">
+            📂 KBLI 2025
+            <span class="badge badge-free">🌐 Gratis</span>
+        </div>
+
+        <div class="form-group">
+            <label for="inputKbli">Cari KBLI</label>
+            <div class="input-group">
+                <input type="text" id="inputKbli" placeholder="Contoh: pertanian, teknologi..." autocomplete="off">
+                <button class="btn-cari btn-secondary" id="btnCariKbli">Cari</button>
+            </div>
+        </div>
+
+        <div class="hasil-box" id="hasilBoxKbli">
+            <div class="hasil-label" id="hasilLabelKbli">📊 Memuat data...</div>
+            <div id="hasilListKbli"></div>
+        </div>
+
+    </div>
+    <a href="index.html" class="back-link">← Kembali ke Halaman Utama</a>
+</div>
+
+<script>
+    // ============================================================
+    // 1. PROFESI (dengan Token)
+    // ============================================================
+    const VALID_TOKENS = [
+        'rajadesahera', 'rajadesalena', 'rajadesalina',
+        'rajadesanina', 'rajadesasalman', 'purwarajauher', 'purwarajaehat'
+    ];
+
+    function validateToken(token) {
+        return VALID_TOKENS.includes(token.trim().toLowerCase());
+    }
+
+    const DAFTAR_PROFESI = `000. Tidak Bekerja
 001. Agen Tenaga Kerja
 002. Ahli Sejarah dan Cagar Budaya
 003. Akuntan
@@ -342,61 +489,225 @@
 185. Lainnya (tuliskan: ....................................)
 999. Tidak Tahu`;
 
-        async function cariProfesi() {
-            const keyword = document.getElementById('inputProfesi').value.trim();
-            const btn = document.getElementById('btnCari');
-            const hasilBox = document.getElementById('hasilBox');
-            const hasilLabel = document.getElementById('hasilLabel');
-            const hasilProfesi = document.getElementById('hasilProfesi');
-            const hasilKode = document.getElementById('hasilKode');
-            const petunjukSaran = document.getElementById('petunjukSaran');
+    async function cariProfesi() {
+        const keyword = document.getElementById('inputProfesi').value.trim();
+        const btn = document.getElementById('btnCariProfesi');
+        const hasilBox = document.getElementById('hasilBoxProfesi');
+        const hasilLabel = document.getElementById('hasilLabelProfesi');
+        const hasilJudul = document.getElementById('hasilJudulProfesi');
+        const hasilKode = document.getElementById('hasilKodeProfesi');
+        const petunjuk = document.getElementById('petunjukSaranProfesi');
 
-            if (!keyword) return;
-
-            btn.disabled = true;
-            btn.textContent = 'Mencari...';
-            hasilBox.classList.remove('show', 'error-box');
-            petunjukSaran.classList.remove('show');
-
-            try {
-                const response = await fetch('/.netlify/functions/cari-profesi', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ keyword: keyword })
-                });
-
-                const data = await response.json();
-                const jawaban = data.choices[0].message.content.trim();
-
-                if (jawaban.includes('185') && jawaban.includes('saran:')) {
-                    const parts = jawaban.split('(saran:');
-                    hasilProfesi.textContent = parts[0].trim();
-                    hasilKode.textContent = '';
-                    petunjukSaran.textContent = 'Saran: ' + parts[1].replace(')', '').trim();
-                    petunjukSaran.classList.add('show');
-                } else {
-                    hasilProfesi.textContent = jawaban;
-                    hasilKode.textContent = 'Pencocokan AI';
-                }
-
-                hasilLabel.textContent = 'Hasil Pencarian';
-                hasilBox.classList.add('show');
-
-            } catch (err) {
-                hasilLabel.textContent = 'Error';
-                hasilProfesi.textContent = 'Gagal menghubungi AI';
-                hasilKode.textContent = 'Periksa koneksi internet';
-                hasilBox.classList.add('error-box', 'show');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Cari Profesi';
+        // Validasi token
+        const token = sessionStorage.getItem('tokenProfesi');
+        if (!token || !validateToken(token)) {
+            const userToken = prompt('Masukkan token untuk pencarian profesi:');
+            if (userToken && validateToken(userToken)) {
+                sessionStorage.setItem('tokenProfesi', userToken);
+            } else {
+                alert('Token tidak valid!');
+                return;
             }
         }
 
-        // Enter key
-        document.getElementById('inputProfesi').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') cariProfesi();
+        if (!keyword) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Mencari...';
+        hasilBox.classList.remove('show', 'error-box');
+        petunjuk.classList.remove('show');
+
+        try {
+            const response = await fetch('/.netlify/functions/cari-profesi', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ keyword: keyword })
+            });
+
+            const data = await response.json();
+            const jawaban = data.choices[0].message.content.trim();
+
+            if (jawaban.includes('185') && jawaban.includes('saran:')) {
+                const parts = jawaban.split('(saran:');
+                hasilJudul.textContent = parts[0].trim();
+                hasilKode.textContent = '';
+                petunjuk.textContent = '💡 Saran: ' + parts[1].replace(')', '').trim();
+                petunjuk.classList.add('show');
+            } else {
+                hasilJudul.textContent = jawaban;
+                hasilKode.textContent = '✅ Pencocokan AI';
+            }
+
+            hasilLabel.textContent = 'Hasil Pencarian Profesi';
+            hasilBox.classList.add('show');
+
+        } catch (err) {
+            hasilLabel.textContent = '⚠️ Error';
+            hasilJudul.textContent = 'Gagal menghubungi server';
+            hasilKode.textContent = 'Periksa koneksi internet';
+            hasilBox.classList.add('error-box', 'show');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Cari';
+        }
+    }
+
+    // ============================================================
+    // 2. KBLI (MANUAL SEARCH - Tanpa Library)
+    // ============================================================
+    let dataKbli = [];
+    let dataLoaded = false;
+    let aktifElement = null;
+
+    // Elemen DOM KBLI
+    const inputKbli = document.getElementById('inputKbli');
+    const btnKbli = document.getElementById('btnCariKbli');
+    const hasilBoxKbli = document.getElementById('hasilBoxKbli');
+    const hasilLabelKbli = document.getElementById('hasilLabelKbli');
+    const hasilListKbli = document.getElementById('hasilListKbli');
+
+    // Load data dari file JSON
+    fetch('kbli-2025.json')
+        .then(res => {
+            if (!res.ok) throw new Error('File kbli-2025.json tidak ditemukan (HTTP ' + res.status + ')');
+            return res.json();
+        })
+        .then(data => {
+            dataKbli = data;
+            dataLoaded = true;
+            console.log('✅ Data KBLI loaded:', dataKbli.length);
+            hasilLabelKbli.textContent = '📊 ' + dataKbli.length + ' data KBLI siap';
+        })
+        .catch(err => {
+            console.error('❌ Gagal load KBLI:', err);
+            hasilLabelKbli.textContent = '⚠️ ' + err.message;
+            hasilLabelKbli.style.color = '#c62828';
         });
-    </script>
+
+    // Fungsi pencarian KBLI
+    function cariKbli() {
+        const keyword = inputKbli.value.trim();
+        console.log('🔍 cariKbli() dipanggil, keyword:', keyword);
+
+        if (!keyword) {
+            hasilLabelKbli.textContent = '⚠️ Masukkan kata kunci';
+            return;
+        }
+
+        if (!dataLoaded || dataKbli.length === 0) {
+            hasilLabelKbli.textContent = '⏳ Data KBLI belum siap, tunggu sebentar...';
+            return;
+        }
+
+        btnKbli.disabled = true;
+        btnKbli.innerHTML = '<span class="spinner"></span> Mencari...';
+        hasilBoxKbli.classList.remove('show', 'error-box');
+        hasilListKbli.innerHTML = '';
+        aktifElement = null;
+
+        try {
+            // Pecah keyword menjadi kata-kata
+            const kataKunci = keyword.toLowerCase().split(' ');
+            let hasil = [];
+
+            // Cari data yang mengandung SEMUA kata di judul atau uraian
+            hasil = dataKbli.filter(item => {
+                const teks = (item.judul + ' ' + item.uraian).toLowerCase();
+                return kataKunci.every(kata => teks.includes(kata));
+            });
+
+            // Jika tidak ada hasil, coba cari dengan OR (salah satu kata)
+            if (hasil.length === 0) {
+                console.log('Fallback: mencari dengan OR...');
+                hasil = dataKbli.filter(item => {
+                    const teks = (item.judul + ' ' + item.uraian).toLowerCase();
+                    return kataKunci.some(kata => teks.includes(kata));
+                });
+            }
+
+            // Tampilkan hasil (maks 5)
+            if (hasil.length > 0) {
+                const limit = Math.min(hasil.length, 5);
+                hasilLabelKbli.textContent = 'Hasil KBLI (' + limit + ' dari ' + hasil.length + ' ditemukan)';
+                let html = '';
+                for (let i = 0; i < limit; i++) {
+                    const item = hasil[i];
+                    const cuplikan = item.uraian ? item.uraian.substring(0, 120) + '...' : '';
+                    html += `
+                        <div class="kbli-item" onclick="toggleDetailKbli(this)">
+                            <div>
+                                <span class="arrow">▶</span>
+                                <span class="kbli-kode">${item.kode}</span>
+                                <span class="kbli-judul">${item.judul}</span>
+                            </div>
+                            <div class="kbli-cuplikan">${cuplikan}</div>
+                            <div class="kbli-detail">${item.uraian || 'Tidak ada uraian'}</div>
+                        </div>
+                    `;
+                }
+                hasilListKbli.innerHTML = html;
+                hasilBoxKbli.classList.add('show');
+            } else {
+                hasilLabelKbli.textContent = 'Tidak ditemukan';
+                hasilListKbli.innerHTML = '<div style="color:var(--text-light);padding:12px;">Tidak ada hasil untuk "<strong>' + keyword + '</strong>"</div>';
+                hasilBoxKbli.classList.add('show');
+            }
+
+        } catch (err) {
+            console.error('Error KBLI:', err);
+            hasilLabelKbli.textContent = '⚠️ Error';
+            hasilListKbli.innerHTML = '<div style="color:#c62828;">Terjadi kesalahan: ' + err.message + '</div>';
+            hasilBoxKbli.classList.add('error-box', 'show');
+        } finally {
+            btnKbli.disabled = false;
+            btnKbli.textContent = 'Cari';
+        }
+    }
+
+    // Fungsi toggle detail accordion
+    window.toggleDetailKbli = function(clickedElement) {
+        const detail = clickedElement.querySelector('.kbli-detail');
+        const arrow = clickedElement.querySelector('.arrow');
+
+        if (aktifElement === clickedElement) {
+            detail.style.display = 'none';
+            arrow.textContent = '▶';
+            aktifElement = null;
+            return;
+        }
+
+        if (aktifElement) {
+            const oldDetail = aktifElement.querySelector('.kbli-detail');
+            const oldArrow = aktifElement.querySelector('.arrow');
+            oldDetail.style.display = 'none';
+            oldArrow.textContent = '▶';
+        }
+
+        detail.style.display = 'block';
+        arrow.textContent = '▼';
+        aktifElement = clickedElement;
+    };
+
+    // Event listener untuk KBLI
+    btnKbli.addEventListener('click', cariKbli);
+    inputKbli.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') cariKbli();
+    });
+
+    // Event listener untuk profesi
+    document.getElementById('inputProfesi').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') cariProfesi();
+    });
+    document.getElementById('btnCariProfesi').addEventListener('click', cariProfesi);
+
+    // Cek token di awal
+    const savedToken = sessionStorage.getItem('tokenProfesi');
+    if (savedToken && validateToken(savedToken)) {
+        // Token valid, tidak perlu prompt
+    }
+
+    console.log('✅ profesi.html siap digunakan');
+</script>
+
 </body>
 </html>
